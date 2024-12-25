@@ -66,7 +66,7 @@ const Forget_Password = () => {
                             type="submit"
                             className="py-[19px] w-full bg-blue text-white rounded-[24px] text-base leading-[19px] font-semibold font-montserrat mb-[43px]"
                         >
-                            Gönder
+                            Gönder 
                         </button>
                     </form>
                 </div>
