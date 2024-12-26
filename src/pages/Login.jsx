@@ -1,9 +1,17 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import google from '../assets/img/gmail.svg';
 import facebook from '../assets/img/face.svg';
 import { initializeApp } from 'firebase/app';
-import { getAuth, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider } from 'firebase/auth';
+import { 
+    getAuth, 
+    signInWithEmailAndPassword,
+    signInWithPopup, 
+    GoogleAuthProvider, 
+    FacebookAuthProvider 
+} from 'firebase/auth';
 import { getAnalytics } from 'firebase/analytics';
 
 const firebaseConfig = {
@@ -24,56 +32,113 @@ const auth = getAuth(app);
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
     const handleLogin = async (e) => {
         e.preventDefault();
-        setError('');
+        setIsLoading(true);
 
         if (!email || !password) {
-            setError('Zəhmət olmasa e-poçtunuzu və parolunuzu daxil edin.');
+            toast.warn('Zəhmət olmasa e-poçtunuzu və parolunuzu daxil edin.', {
+                position: "top-right",
+                autoClose: 3000,
+            });
+            setIsLoading(false);
             return;
         }
 
         try {
-            const response = await fetch('https://jsonplaceholder.typicode.com/users');
-            const users = await response.json();
-            const user = users.find((user) => user.email === email);
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+            
+            // İstifadəçi məlumatlarını localStorage-də saxlayırıq
+            localStorage.setItem('userEmail', user.email);
+            
+            toast.success('Daxil olma uğurlu oldu!', {
+                position: "top-right",
+                autoClose: 2000,
+            });
 
-            if (user) {
-                localStorage.setItem('authToken', `fake-token-for-${user.email}`);
-                alert('Daxil olma uğurlu oldu!');
+            setTimeout(() => {
                 navigate('/textinput');
-            } else {
-                throw new Error('İstifadəçi tapılmadı. E-poçtunuzu yoxlayın.');
+            }, 2000);
+        } catch (error) {
+            console.error('Login error:', error);
+            
+            switch (error.code) {
+                case 'auth/user-not-found':
+                    toast.error('Bu email ilə istifadəçi tapılmadı.', {
+                        position: "top-right",
+                        autoClose: 3000,
+                    });
+                    break;
+                case 'auth/wrong-password':
+                    toast.error('Yanlış parol.', {
+                        position: "top-right",
+                        autoClose: 3000,
+                    });
+                    break;
+                case 'auth/invalid-email':
+                    toast.error('Düzgün email formatı deyil.', {
+                        position: "top-right",
+                        autoClose: 3000,
+                    });
+                    break;
+                default:
+                    toast.error('Daxil olma zamanı xəta baş verdi.', {
+                        position: "top-right",
+                        autoClose: 3000,
+                    });
             }
-        } catch (err) {
-            setError(err.message);
+        } finally {
+            setIsLoading(false);
         }
     };
 
-    // Google ilə daxil olma funksiyası
     const handleGoogleSignIn = async () => {
+        setIsLoading(true);
         const provider = new GoogleAuthProvider();
         try {
             const result = await signInWithPopup(auth, provider);
-            alert('Google ilə daxil oldunuz!');
-            navigate('/textinput');
+            localStorage.setItem('userEmail', result.user.email);
+            toast.success('Google ilə daxil oldunuz!', {
+                position: "top-right",
+                autoClose: 2000,
+            });
+            setTimeout(() => {
+                navigate('/textinput');
+            }, 2000);
         } catch (error) {
-            setError(error.message);
+            toast.error('Google ilə daxil olma zamanı xəta baş verdi.', {
+                position: "top-right",
+                autoClose: 3000,
+            });
+        } finally {
+            setIsLoading(false);
         }
     };
 
-    // Facebook ilə daxil olma funksiyası
     const handleFacebookSignIn = async () => {
+        setIsLoading(true);
         const provider = new FacebookAuthProvider();
         try {
             const result = await signInWithPopup(auth, provider);
-            alert('Facebook ilə daxil oldunuz!');
-            navigate('/textinput');
+            localStorage.setItem('userEmail', result.user.email);
+            toast.success('Facebook ilə daxil oldunuz!', {
+                position: "top-right",
+                autoClose: 2000,
+            });
+            setTimeout(() => {
+                navigate('/textinput');
+            }, 2000);
         } catch (error) {
-            setError(error.message);
+            toast.error('Facebook ilə daxil olma zamanı xəta baş verdi.', {
+                position: "top-right",
+                autoClose: 3000,
+            });
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -81,10 +146,11 @@ const Login = () => {
         <div className='w-full max-w-lg mx-auto pt-10 pb-16 px-4 flex items-center justify-center mt-[130px]'>
             <div className='flex flex-col items-center justify-center w-[361px]'>
                 <div className="w-full">
-                    <h1 className="text-center text-black text-2xl sm:text-3xl font-semibold font-montserrat leading-normal mb-4">Xoş gəlmişsiniz</h1>
+                    <h1 className="text-center text-black text-2xl sm:text-3xl font-semibold font-montserrat leading-normal mb-4">
+                        Xoş gəlmişsiniz
+                    </h1>
 
                     <form onSubmit={handleLogin} className="w-full">
-                        {/* E-mail */}
                         <div className='grid grid-rows gap-2 mb-3'>
                             <label className="text-black text-sm font-medium font-montserrat">E-mail</label>
                             <div className="w-full px-3 py-2 rounded-md border border-gray-300">
@@ -94,12 +160,12 @@ const Login = () => {
                                     className="w-full text-sm font-medium font-['Inter'] leading-normal focus:outline-none focus:border-transparent"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
+                                    disabled={isLoading}
                                     required
                                 />
                             </div>
                         </div>
 
-                        {/* Parol */}
                         <div className='grid grid-rows gap-2'>
                             <label className="text-black text-sm font-medium font-montserrat">Parol</label>
                             <div className="w-full px-3 py-2 rounded-md border border-gray-300">
@@ -109,48 +175,56 @@ const Login = () => {
                                     className="w-full text-sm font-medium font-['Inter'] leading-normal focus:outline-none focus:border-transparent"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
+                                    disabled={isLoading}
                                     required
                                 />
                             </div>
                         </div>
 
-                        {error && <p className="text-red-500 text-sm my-2">{error}</p>}
-                        <Link to='/forgetpassword'><p className='font-medium text-base leading-normal my-6 text-center font-montserrat'>Parolu unutmusan?</p></Link>
+                        <Link to='/forgetpassword'>
+                            <p className='font-medium text-base leading-normal my-6 text-center font-montserrat'>
+                                Parolu unutmusan?
+                            </p>
+                        </Link>
 
                         <button
                             type="submit"
-                            className='py-[19px] w-full bg-blue text-white rounded-[24px] text-base leading-[19px] font-semibold font-montserrat mb-[43px]'
+                            disabled={isLoading}
+                            className='py-[19px] w-full bg-blue text-white rounded-[24px] text-base leading-[19px] font-semibold font-montserrat mb-[43px] disabled:opacity-50'
                         >
-                            Daxil ol
+                            {isLoading ? 'Daxil olunur...' : 'Daxil ol'}
                         </button>
                     </form>
-                </div>
 
-                <div className='flex items-center justify-center w-full mb-6'>
-                    <p className="flex-grow h-px bg-gray-300"></p>
-                    <p className='font-medium text-sm leading-5 mx-2'>Digər hesablar ilə daxil olun</p>
-                    <p className="flex-grow h-px bg-gray-300"></p>
-                </div>
+                    <div className='flex items-center justify-center w-full mb-6'>
+                        <p className="flex-grow h-px bg-gray-300"></p>
+                        <p className='font-medium text-sm leading-5 mx-2'>Digər hesablar ilə daxil olun</p>
+                        <p className="flex-grow h-px bg-gray-300"></p>
+                    </div>
 
-                <div className='flex items-center justify-center gap-4'>
-                    <a
-                        className='flex items-center justify-center'
-                        href="#"
-                        onClick={handleGoogleSignIn}
-                    >
-                        <img className='size-[48px]' src={google} alt="google" />
-                    </a>
-                    <a
-                        className='flex items-center justify-center'
-                        href="#"
-                        onClick={handleFacebookSignIn}
-                    >
-                        <img className='size-[48px]' src={facebook} alt="facebook" />
-                    </a>
-                </div>
+                    <div className='flex items-center justify-center gap-4'>
+                        <button
+                            className='flex items-center justify-center'
+                            onClick={handleGoogleSignIn}
+                            disabled={isLoading}
+                        >
+                            <img className='size-[48px]' src={google} alt="google" />
+                        </button>
+                        <button
+                            className='flex items-center justify-center'
+                            onClick={handleFacebookSignIn}
+                            disabled={isLoading}
+                        >
+                            <img className='size-[48px]' src={facebook} alt="facebook" />
+                        </button>
+                    </div>
 
-                <p className="mt-6 text-center">Hesabınız yoxdur? <Link to='/registration' className='text-[#7B7DCF]'>Qeydiyyatdan keçin</Link></p>
+                    <p className="mt-6 text-center">
+                        Hesabınız yoxdur? <Link to='/registration' className='text-[#7B7DCF]'>Qeydiyyatdan keçin</Link>
+                    </p>
+                </div>
             </div>
+            <ToastContainer />
         </div>
     );
 };

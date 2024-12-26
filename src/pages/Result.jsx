@@ -28,13 +28,23 @@ const Result = ({ searchHistory = [] }) => {
     const [latestSearch, setLatestSearch] = useState({ text: null, url: null });
     const [score, setScore] = useState(location.state?.score || 0);
     const [apiResponse, setApiResponse] = useState(null);
+    const [username, setUsername] = useState('A');
+
+    useEffect(() => {
+        // Get user email from localStorage
+        const userEmail = localStorage.getItem('userEmail');
+        if (userEmail) {
+            // Extract username from email (before @)
+            const extractedUsername = userEmail.split('@')[0];
+            setUsername(extractedUsername);
+        }
+    }, []);
 
     useEffect(() => {
         const fetchFactCheck = async () => {
             try {
                 const searchText = location.state?.searchText || "";
 
-                // New API request using the provided URL
                 const response = await fetch('https://fact-checking-assistant.onrender.com/factcheck', {
                     method: 'POST',
                     headers: {
@@ -49,10 +59,10 @@ const Result = ({ searchHistory = [] }) => {
 
                 const data = await response.json();
                 setApiResponse(data);
-                setScore(data.score || 0); // Update score based on the API response
+                setScore(data.score || 0);
             } catch (error) {
                 console.error('Full error details:', error);
-                setScore(0); // Default score added in case of failure
+                setScore(0);
             }
         };
 
@@ -111,9 +121,9 @@ const Result = ({ searchHistory = [] }) => {
 
             <div className="grid grid-rows">
                 <section className="flex justify-end gap-4 pt-4 pr-4 md:pt-10 md:pr-8 bg-white">
-                    <Link to="/result" className="bg-blue w-[80px] md:w-[100px] lg:w-[168px] h-8 md:h-9 text-white rounded-full text-center text-xs md:text-sm lg:text-base flex items-center justify-center">
-                        A
-                    </Link>
+                    <div className="bg-blue w-[80px] md:w-[100px] lg:w-[168px] h-8 md:h-9 text-white rounded-full text-center text-xs md:text-sm lg:text-base flex items-center justify-center">
+                        {username}
+                    </div>
                     <Link to="/registration">
                         <img src={enter} alt="enter" className="size-8 md:size-9" />
                     </Link>

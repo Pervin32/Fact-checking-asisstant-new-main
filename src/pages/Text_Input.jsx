@@ -1,20 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import enter from '@/assets/img/enter.svg';
 import search from '@/assets/img/search.svg';
 import { Link, useNavigate } from 'react-router-dom';
 
-const Text_Input = ({ addSearchToHistory, username }) => {
-  const [searchText, setSearchText] = useState(''); // Axtarış mətni üçün state
+const Text_Input = () => {
+  const [searchText, setSearchText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [username, setUsername] = useState('');
   const navigate = useNavigate();
 
+  useEffect(() => {
+    // Get user email from localStorage
+    const userEmail = localStorage.getItem('userEmail');
+    if (userEmail) {
+      // Extract username from email (before @)
+      const extractedUsername = userEmail.split('@')[0];
+      setUsername(extractedUsername);
+    }
+  }, []);
+
   const handleSearch = async () => {
-    if (searchText.trim() === '') return; // Boş mətni yoxlayır
+    if (searchText.trim() === '') return;
 
     try {
       setIsLoading(true);
 
-      // Mock API response ( data)
       const mockApiResponse = {
         score: 0,
         sources: [
@@ -26,9 +36,7 @@ const Text_Input = ({ addSearchToHistory, username }) => {
         ],
       };
 
-      // Simulate delay to mimic real API call
       setTimeout(() => {
-        // Hazırlanan məlumatlar API cavabına əsasən
         const loadingData = {
           searchText,
           score: mockApiResponse.score,
@@ -36,19 +44,14 @@ const Text_Input = ({ addSearchToHistory, username }) => {
           recommendations: mockApiResponse.recommendations,
         };
 
-        // Axtarışı tarixçəyə əlavə etmək
-        addSearchToHistory(searchText);
-
-        // Yönləndirmə /result səhifəsinə
         navigate('/result', { state: loadingData });
-      }, 3000); // Simulate a 1-second delay
+      }, 3000);
     } catch (error) {
       console.error('Error in mock API:', error);
 
-      // Fallback error handling
       const loadingData = {
         searchText,
-        score: 50, // Neutral score for failed requests
+        score: 50,
         sources: [
           { title: 'Error', score: 0, description: 'Unable to verify fact' },
         ],
@@ -68,45 +71,34 @@ const Text_Input = ({ addSearchToHistory, username }) => {
   const handleKeyPress = (event) => {
     if (event.key === 'Enter') {
       handleSearch();
-      navigate('/loading'); // Enter düyməsinə basıldıqda handleSearch funksiyası çağırılır
+      navigate('/loading');
     }
   };
 
   return (
     <div>
-      {/* Üst butonlar */}
       <div className="flex justify-end gap-6 pt-10 pr-8">
-        {username ? (
-          <div className="bg-blue w-[100px] sm:w-[168px] h-9 text-white rounded-full text-center text-sm sm:text-base leading-[30px] flex items-center justify-center">
-            {username}
-          </div>
-        ) : (
-          <Link
-            to="/loading"
-            className="bg-blue w-[100px] sm:w-[168px] h-9 text-white rounded-full text-center text-sm sm:text-base leading-[30px] flex items-center justify-center"
-          >
-            A
-          </Link>
-        )}
+        <div className="bg-blue w-[100px] sm:w-[168px] h-9 text-white rounded-full text-center text-sm sm:text-base leading-[30px] flex items-center justify-center">
+          {username || 'A'}
+        </div>
         <Link to="/registration">
           <img src={enter} alt="enter" className="size-8 md:size-9" />
         </Link>
       </div>
 
-      {/* Axtarış */}
       <div className="max-w-[744px] w-full h-12 sm:h-[52px] flex items-center justify-between mx-auto mt-[150px] sm:mt-[375px] border px-4 sm:px-6 rounded-lg sm:rounded-[16px] text-[#8D8D8D]">
         <input
           type="text"
           placeholder="İnformasiya və ya keçid linkini bura daxil edin!"
           className="w-full text-sm sm:text-lg leading-6 outline-none"
-          value={searchText} // Axtarış mətni
-          onChange={(e) => setSearchText(e.target.value)} // Mətni dəyişdikdə yeniləyir
-          onKeyDown={handleKeyPress} // Enter basıldıqda handleKeyPress çağırılır
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+          onKeyDown={handleKeyPress}
           disabled={isLoading}
         />
         <div
           className={`bg-[#959595] w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center cursor-pointer ${isLoading ? 'opacity-50' : ''}`}
-          onClick={!isLoading ? handleSearch : undefined} // Axtarış düyməsinə basıldıqda handleSearch çağırılır
+          onClick={!isLoading ? handleSearch : undefined}
         >
           {isLoading ? (
             <div className="animate-spin">
