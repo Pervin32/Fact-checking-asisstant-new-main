@@ -1,14 +1,10 @@
 import React, { useState } from 'react';
-import { getAuth, sendPasswordResetEmail } from 'firebase/auth'; // Firebase importu
 
 const Forget_Password = () => {
     // State-lər
     const [email, setEmail] = useState('');  // E-poçt dəyəri üçün state
     const [error, setError] = useState('');  // Xəta mesajı üçün state
     const [message, setMessage] = useState('');  // Uğurlu mesaj üçün state
-
-    // Firebase Auth instance
-    const auth = getAuth();
 
     // Parol sıfırlama formunun submit funksiyası
     const handleLogin = async (e) => {
@@ -21,14 +17,10 @@ const Forget_Password = () => {
             return;
         }
 
-        try {
-            // Firebase ilə parol sıfırlama e-poçtunu göndəririk
-            await sendPasswordResetEmail(auth, email);
-            setMessage('E-poçt göndərildi! Xahiş edirik e-poçtunuza baxın və parolunuzu sıfırlayın.');
-        } catch (error) {
-            setError('Parol sıfırlanarkən xəta baş verdi. Xahiş edirik yenidən cəhd edin.');
-            console.error('Error sending password reset email: ', error.message);
-        }
+        // Burada e-poçt əsasında parol sıfırlama prosesi həyata keçiriləcək.
+        // Məsələn, Firebase ilə e-poçt göndərə bilərsiniz.
+
+        setMessage('E-poçt göndərildi! Xahiş edirik e-poçtunuza baxın və parolunuzu sıfırlayın.');
     };
 
     return (
@@ -66,7 +58,7 @@ const Forget_Password = () => {
                             type="submit"
                             className="py-[19px] w-full bg-blue text-white rounded-[24px] text-base leading-[19px] font-semibold font-montserrat mb-[43px]"
                         >
-                            Gönder 
+                            Gönder
                         </button>
                     </form>
                 </div>
