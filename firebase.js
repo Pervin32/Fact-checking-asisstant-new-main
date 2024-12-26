@@ -4,7 +4,7 @@ import { getAnalytics } from "firebase/analytics";
 
 // Firebase konfiqurasiyası
 const firebaseConfig = {
-  apiKey: AIzaSyAqsWZ5_ri2DBim6cgtMn2ir9w8t3XXa-8, // .env-də saxla
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY, // .env-də saxla
   authDomain: "fact-checking-asisstant.firebaseapp.com",
   projectId: "fact-checking-asisstant",
   storageBucket: "fact-checking-asisstant.appspot.com",
