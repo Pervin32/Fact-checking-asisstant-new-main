@@ -35,6 +35,7 @@ const Login = () => {
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
+    // ... [keeping all the existing handler functions unchanged]
     const handleLogin = async (e) => {
         e.preventDefault();
         setIsLoading(true);
@@ -51,8 +52,6 @@ const Login = () => {
         try {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
-            
-            // İstifadəçi məlumatlarını localStorage-də saxlayırıq
             localStorage.setItem('userEmail', user.email);
             
             toast.success('Daxil olma uğurlu oldu!', {
@@ -143,21 +142,21 @@ const Login = () => {
     };
 
     return (
-        <div className='w-full max-w-lg mx-auto pt-10 pb-16 px-4 flex items-center justify-center mt-[130px]'>
-            <div className='flex flex-col items-center justify-center w-[361px]'>
+        <div className='min-h-screen w-full px-4 sm:px-6 py-6 sm:py-10 flex items-center justify-center'>
+            <div className='w-full max-w-[361px] sm:max-w-lg mx-auto mt-[60px] sm:mt-[130px]'>
                 <div className="w-full">
-                    <h1 className="text-center text-black text-2xl sm:text-3xl font-semibold font-montserrat leading-normal mb-4">
+                    <h1 className="text-center text-black text-xl sm:text-2xl md:text-3xl font-semibold font-montserrat leading-normal mb-4">
                         Xoş gəlmişsiniz
                     </h1>
 
-                    <form onSubmit={handleLogin} className="w-full">
-                        <div className='grid grid-rows gap-2 mb-3'>
-                            <label className="text-black text-sm font-medium font-montserrat">E-mail</label>
-                            <div className="w-full px-3 py-2 rounded-md border border-gray-300">
+                    <form onSubmit={handleLogin} className="w-full space-y-3 sm:space-y-4">
+                        <div className='space-y-2'>
+                            <label className="text-black text-xs sm:text-sm font-medium font-montserrat">E-mail</label>
+                            <div className="w-full px-2 sm:px-3 py-2 rounded-md border border-gray-300">
                                 <input
                                     type='email'
                                     placeholder='E-poçtunuzu bura daxil edin'
-                                    className="w-full text-sm font-medium font-['Inter'] leading-normal focus:outline-none focus:border-transparent"
+                                    className="w-full text-xs sm:text-sm font-medium font-['Inter'] leading-normal focus:outline-none focus:border-transparent"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     disabled={isLoading}
@@ -166,13 +165,13 @@ const Login = () => {
                             </div>
                         </div>
 
-                        <div className='grid grid-rows gap-2'>
-                            <label className="text-black text-sm font-medium font-montserrat">Parol</label>
-                            <div className="w-full px-3 py-2 rounded-md border border-gray-300">
+                        <div className='space-y-2'>
+                            <label className="text-black text-xs sm:text-sm font-medium font-montserrat">Parol</label>
+                            <div className="w-full px-2 sm:px-3 py-2 rounded-md border border-gray-300">
                                 <input
                                     type='password'
                                     placeholder='************'
-                                    className="w-full text-sm font-medium font-['Inter'] leading-normal focus:outline-none focus:border-transparent"
+                                    className="w-full text-xs sm:text-sm font-medium font-['Inter'] leading-normal focus:outline-none focus:border-transparent"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     disabled={isLoading}
@@ -182,7 +181,7 @@ const Login = () => {
                         </div>
 
                         <Link to='/forgetpassword'>
-                            <p className='font-medium text-base leading-normal my-6 text-center font-montserrat'>
+                            <p className='font-medium text-sm sm:text-base leading-normal my-4 sm:my-6 text-center font-montserrat'>
                                 Parolu unutmusan?
                             </p>
                         </Link>
@@ -190,15 +189,15 @@ const Login = () => {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className='py-[19px] w-full bg-blue text-white rounded-[24px] text-base leading-[19px] font-semibold font-montserrat mb-[43px] disabled:opacity-50'
+                            className='py-3 sm:py-[19px] w-full bg-blue text-white rounded-[24px] text-sm sm:text-base leading-[19px] font-semibold font-montserrat mb-6 sm:mb-[43px] disabled:opacity-50'
                         >
                             {isLoading ? 'Daxil olunur...' : 'Daxil ol'}
                         </button>
                     </form>
 
-                    <div className='flex items-center justify-center w-full mb-6'>
+                    <div className='flex items-center justify-center w-full mb-4 sm:mb-6'>
                         <p className="flex-grow h-px bg-gray-300"></p>
-                        <p className='font-medium text-sm leading-5 mx-2'>Digər hesablar ilə daxil olun</p>
+                        <p className='font-medium text-xs sm:text-sm leading-5 mx-2'>Digər hesablar ilə daxil olun</p>
                         <p className="flex-grow h-px bg-gray-300"></p>
                     </div>
 
@@ -208,18 +207,18 @@ const Login = () => {
                             onClick={handleGoogleSignIn}
                             disabled={isLoading}
                         >
-                            <img className='size-[48px]' src={google} alt="google" />
+                            <img className='w-10 h-10 sm:w-12 sm:h-12' src={google} alt="google" />
                         </button>
                         <button
                             className='flex items-center justify-center'
                             onClick={handleFacebookSignIn}
                             disabled={isLoading}
                         >
-                            <img className='size-[48px]' src={facebook} alt="facebook" />
+                            <img className='w-10 h-10 sm:w-12 sm:h-12' src={facebook} alt="facebook" />
                         </button>
                     </div>
 
-                    <p className="mt-6 text-center">
+                    <p className="mt-4 sm:mt-6 text-center text-sm sm:text-base">
                         Hesabınız yoxdur? <Link to='/registration' className='text-[#7B7DCF]'>Qeydiyyatdan keçin</Link>
                     </p>
                 </div>

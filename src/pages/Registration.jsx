@@ -42,6 +42,7 @@ const Registration = () => {
   const googleProvider = new GoogleAuthProvider();
   const facebookProvider = new FacebookAuthProvider();
 
+  // All handlers remain exactly the same
   const handleRegister = async (e) => {
     e.preventDefault();
     
@@ -75,7 +76,6 @@ const Registration = () => {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
       
-      // İstifadəçi məlumatlarını localStorage-də saxlayırıq
       localStorage.setItem('userEmail', user.email);
 
       toast.success('Qeydiyyat uğurla tamamlandı!', {
@@ -149,8 +149,8 @@ const Registration = () => {
   };
 
   return (
-    <div className='w-full max-w-lg mx-auto pt-10 pb-16 px-4 flex items-center justify-center mt-[130px]'>
-      <div className='flex flex-col items-center justify-center w-[361px]'>
+    <div className='w-full max-w-lg mx-auto pt-10 pb-16 px-4 flex items-center justify-center mt-[40px] sm:mt-[130px]'>
+      <div className='flex flex-col items-center justify-center w-full sm:w-[361px]'>
         <h1 className="text-center text-black text-2xl font-semibold font-montserrat leading-normal mb-4">
           Hesabınızı yaradın
         </h1>
@@ -158,11 +158,11 @@ const Registration = () => {
         <form onSubmit={handleRegister} className="w-full">
           <div className='grid grid-rows gap-[6px] mb-[12px]'>
             <label className="text-black text-sm font-medium font-montserrat">E-mail</label>
-            <div className="w-[361px] px-2.5 py-[13px] rounded-md border border-[#d9d9d9]">
+            <div className="w-full sm:w-[361px] px-2.5 py-[13px] rounded-md border border-[#d9d9d9]">
               <input
                 type='email'
                 placeholder='E-poçtunuzu bura daxil edin'
-                className="pl-[10px] text-sm font-medium font-['Inter'] leading-normal size-full focus:outline-none focus:border-transparent"
+                className="pl-[10px] text-sm font-medium font-['Inter'] leading-normal w-full focus:outline-none focus:border-transparent"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isLoading}
@@ -172,11 +172,11 @@ const Registration = () => {
 
           <div className='grid grid-rows gap-[6px] mb-4'>
             <label className="text-black text-sm font-medium font-montserrat">Parol</label>
-            <div className="w-[361px] px-2.5 py-[13px] rounded-md border">
+            <div className="w-full sm:w-[361px] px-2.5 py-[13px] rounded-md border">
               <input
                 type='password'
                 placeholder='************'
-                className="pl-[10px] text-sm font-medium font-['Inter'] leading-normal size-full focus:outline-none focus:border-transparent"
+                className="pl-[10px] text-sm font-medium font-['Inter'] leading-normal w-full focus:outline-none focus:border-transparent"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isLoading}
@@ -186,11 +186,11 @@ const Registration = () => {
 
           <div className='grid grid-rows gap-[6px] mb-[34px]'>
             <label className="text-black text-sm font-medium font-montserrat">Parolu təkrar yaz</label>
-            <div className="w-[361px] px-2.5 py-[13px] rounded-md border">
+            <div className="w-full sm:w-[361px] px-2.5 py-[13px] rounded-md border">
               <input
                 type='password'
                 placeholder='************'
-                className="pl-[10px] text-sm font-medium font-['Inter'] leading-normal size-full focus:outline-none focus:border-transparent"
+                className="pl-[10px] text-sm font-medium font-['Inter'] leading-normal w-full focus:outline-none focus:border-transparent"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 disabled={isLoading}
@@ -201,15 +201,15 @@ const Registration = () => {
           <button
             type="submit"
             disabled={isLoading}
-            className='py-[19px] w-[361px] bg-blue text-white rounded-[24px] text-base leading-[19px] font-semibold font-montserrat mb-[43px] disabled:opacity-50'
+            className='py-[19px] w-full sm:w-[361px] bg-blue text-white rounded-[24px] text-base leading-[19px] font-semibold font-montserrat mb-[43px] disabled:opacity-50'
           >
             {isLoading ? 'Qeydiyyatdan keçilir...' : 'Qeydiyyatdan keç'}
           </button>
         </form>
 
-        <div className='flex items-center justify-center w-[494px] mb-6'>
+        <div className='flex items-center justify-center w-full sm:w-[494px] mb-6'>
           <p className="flex-grow h-px bg-gray-300"></p>
-          <p className='font-medium text-sm leading-5 mx-2'>Digər hesablar ilə qeydiyyatdan keçin</p>
+          <p className='font-medium text-sm leading-5 mx-2 whitespace-nowrap'>Digər hesablar ilə qeydiyyatdan keçin</p>
           <p className="flex-grow h-px bg-gray-300"></p>
         </div>
 
