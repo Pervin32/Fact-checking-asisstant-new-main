@@ -24,5 +24,10 @@ auth.onAuthStateChanged((user) => {
   console.log('Auth state changed:', user);
 });
 
+const facebookConfig = {
+  appId: '1361334215276862',
+  appSecret: '1c514ca5f6423c6ee8a135dcbe7e2411'
+};
+
 export { auth };
 export default app;

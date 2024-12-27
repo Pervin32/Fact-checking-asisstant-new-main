@@ -98,22 +98,21 @@ const Login = () => {
 
     const handleGoogleSignIn = async () => {
         setIsLoading(true);
-        const provider = new GoogleAuthProvider();
         try {
+            console.log('Google sign-in başladı');
+            const provider = new GoogleAuthProvider();
+            provider.addScope('profile'); // Əlavə edildi
+            provider.addScope('email');   // Əlavə edildi
+            
             const result = await signInWithPopup(auth, provider);
+            console.log('Google auth result:', result);
+            
             localStorage.setItem('userEmail', result.user.email);
-            toast.success('Google ilə daxil oldunuz!', {
-                position: "top-right",
-                autoClose: 2000,
-            });
-            setTimeout(() => {
-                navigate('/textinput');
-            }, 2000);
+            toast.success('Google ilə daxil oldunuz!');
+            navigate('/textinput');
         } catch (error) {
-            toast.error('Google ilə daxil olma zamanı xəta baş verdi.', {
-                position: "top-right",
-                autoClose: 3000,
-            });
+            console.error('Dəqiq xəta:', error);
+            toast.error(`Xəta: ${error.message}`);
         } finally {
             setIsLoading(false);
         }
