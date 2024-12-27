@@ -149,7 +149,7 @@ const Registration = () => {
   };
 
   return (
-    <div className='w-full max-w-lg mx-auto pt-10 pb-16 px-4 flex items-center justify-center mt-[40px] sm:mt-[130px]'>
+    <div className='w-full max-w-lg mx-auto pt-10 pb-16 px-4 flex items-center justify-center mt-[0px] sm:mt-[130px]'>
       <div className='flex flex-col items-center justify-center w-full sm:w-[361px]'>
         <h1 className="text-center text-black text-2xl font-semibold font-montserrat leading-normal mb-4">
           Hesabınızı yaradın
