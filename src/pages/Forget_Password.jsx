@@ -1,26 +1,64 @@
 import React, { useState } from 'react';
+import { getAuth, sendPasswordResetEmail } from 'firebase/auth';
+import { useNavigate } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Forget_Password = () => {
-    // State-lər
-    const [email, setEmail] = useState('');  // E-poçt dəyəri üçün state
-    const [error, setError] = useState('');  // Xəta mesajı üçün state
-    const [message, setMessage] = useState('');  // Uğurlu mesaj üçün state
+    const [email, setEmail] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const navigate = useNavigate();
+    const auth = getAuth();
 
-    // Parol sıfırlama formunun submit funksiyası
     const handleLogin = async (e) => {
         e.preventDefault();
-        setError('');  // Hər dəfə formu göndərməzdən əvvəl xətaları təmizləyirik
-        setMessage(''); // Hər dəfə formu göndərməzdən əvvəl mesajı təmizləyirik
+        setIsLoading(true);
 
         if (!email) {
-            setError('Zəhmət olmasa e-poçt daxil edin.');  // E-poçt daxil edilməyibsə xətanı göstəririk
+            toast.warn('Zəhmət olmasa e-poçt daxil edin.', {
+                position: "top-right",
+                autoClose: 3000,
+            });
+            setIsLoading(false);
             return;
         }
 
-        // Burada e-poçt əsasında parol sıfırlama prosesi həyata keçiriləcək.
-        // Məsələn, Firebase ilə e-poçt göndərə bilərsiniz.
-
-        setMessage('E-poçt göndərildi! Xahiş edirik e-poçtunuza baxın və parolunuzu sıfırlayın.');
+        try {
+            await sendPasswordResetEmail(auth, email);
+            toast.success('Parol sıfırlama linki e-poçtunuza göndərildi!', {
+                position: "top-right",
+                autoClose: 3000,
+            });
+            
+            // 3 saniyə sonra login səhifəsinə yönləndir
+            setTimeout(() => {
+                navigate('/login');
+            }, 3000);
+        } catch (error) {
+            console.error('Password reset error:', error);
+            
+            switch (error.code) {
+                case 'auth/user-not-found':
+                    toast.error('Bu email ilə istifadəçi tapılmadı.', {
+                        position: "top-right",
+                        autoClose: 3000,
+                    });
+                    break;
+                case 'auth/invalid-email':
+                    toast.error('Düzgün email formatı deyil.', {
+                        position: "top-right",
+                        autoClose: 3000,
+                    });
+                    break;
+                default:
+                    toast.error('Xəta baş verdi. Zəhmət olmasa yenidən cəhd edin.', {
+                        position: "top-right",
+                        autoClose: 3000,
+                    });
+            }
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -32,7 +70,6 @@ const Forget_Password = () => {
                     </h1>
 
                     <form onSubmit={handleLogin} className="w-full">
-                        {/* E-mail */}
                         <div className="grid grid-rows gap-5 mb-5">
                             <label className="text-black text-sm font-medium font-montserrat"></label>
                             <div className="w-full px-3 py-2 rounded-md border border-gray-300">
@@ -42,27 +79,23 @@ const Forget_Password = () => {
                                     className="w-full text-sm font-medium font-['Inter'] leading-normal focus:outline-none focus:border-transparent"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
+                                    disabled={isLoading}
                                     required
                                 />
                             </div>
                         </div>
 
-                        {/* Xəta mesajı */}
-                        {error && <p className="text-red-500 text-sm my-2">{error}</p>}
-
-                        {/* Uğurlu mesaj */}
-                        {message && <p className="text-green-500 text-sm my-2">{message}</p>}
-
-                        {/* Giriş düyməsi */}
                         <button
                             type="submit"
-                            className="py-[19px] w-full bg-blue text-white rounded-[24px] text-base leading-[19px] font-semibold font-montserrat mb-[43px]"
+                            disabled={isLoading}
+                            className="py-[19px] w-full bg-blue text-white rounded-[24px] text-base leading-[19px] font-semibold font-montserrat mb-[43px] disabled:opacity-50"
                         >
-                            Gönder
+                            {isLoading ? 'Göndərilir...' : 'Göndər'}
                         </button>
                     </form>
                 </div>
             </div>
+            <ToastContainer />
         </div>
     );
 };

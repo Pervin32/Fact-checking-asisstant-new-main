@@ -1,10 +1,8 @@
-// SDK-lardan sizə lazım olan funksiyaları idxal edir
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
+import { getAuth, connectAuthEmulator } from "firebase/auth";
 
-// Firebase konfiqurasiyası
 const firebaseConfig = {
-  apiKey: process.env.REACT_APP_FIREBASE_API_KEY, // .env-də saxla
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
   authDomain: "fact-checking-asisstant.firebaseapp.com",
   projectId: "fact-checking-asisstant",
   storageBucket: "fact-checking-asisstant.appspot.com",
@@ -12,14 +10,19 @@ const firebaseConfig = {
   appId: "1:543735020388:web:dc0521ea65838e9f271871",
   measurementId: "G-BLQXDLD0PP",
 };
-// Mühit dəyişənlərini doğrulayın
-if (!firebaseConfig.apiKey) {
-  throw new Error("Missing Firebase API Key. Please check your .env file.");
-}
 
-// Firebase-i işə salın
 const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 
-if (typeof window !== "undefined") {
-  const analytics = getAnalytics(app);
+// Development mühitində emulator qoşulması
+if (process.env.NODE_ENV === 'development') {
+  connectAuthEmulator(auth, 'http://localhost:9099');
 }
+
+// Auth state dəyişikliklərini izləyirik
+auth.onAuthStateChanged((user) => {
+  console.log('Auth state changed:', user);
+});
+
+export { auth };
+export default app;

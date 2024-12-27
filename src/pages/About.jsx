@@ -11,7 +11,7 @@ const About = () => {
                     </h1>
                 </section>
                 <p className="text-lg md:text-2xl leading-8 md:leading-[42px] md:w-[634px] md:mt-10">
-                    Fakt Checking Asisstant dezinformasiya ilə mübarizədə innovativ həll təqdim edir. Bununla jurnalistlər, media korporasiyalar və vətəndaşları dəqiqliyi yoxlanmış məlumatları təqdim edir. Məlumatların doğruluğunu qısa zamanda yoxlamaq, istifadəçiləri doğru və etibarlı informasiya ilə təmin etmək əsas məqsədimizdir.
+                    Fakt Checking Assistant dezinformasiya ilə mübarizədə innovativ həll təqdim edir. Bununla jurnalistlər, media korporasiyalar və vətəndaşları dəqiqliyi yoxlanmış məlumatları təqdim edir. Məlumatların doğruluğunu qısa zamanda yoxlamaq, istifadəçiləri doğru və etibarlı informasiya ilə təmin etmək əsas məqsədimizdir.
                     Gələcəkdə yalan məlumatların minimuma endirildiyi və doğru xəbərlərin tirajlanmasında əsas rol almaq istəyirik.  Məqsədimiz ictimaiyyətin mediaya və xəbərə olan olan inamını bərpa etməkdir.
 
                 </p>
