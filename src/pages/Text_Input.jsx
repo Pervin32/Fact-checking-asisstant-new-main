@@ -10,10 +10,23 @@ const Text_Input = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // localStorage-dan məlumatları alaq
     const userEmail = localStorage.getItem('userEmail');
-    if (userEmail) {
+    const facebookProfile = localStorage.getItem('facebookProfile');
+    
+    console.log('Raw localStorage data:', {
+      userEmail,
+      facebookProfile
+    });
+  
+    // null string-ini yoxlayaq
+    if (facebookProfile && facebookProfile !== 'null') {
+      setUsername(facebookProfile);
+    } else if (userEmail && userEmail !== 'null') {
       const extractedUsername = userEmail.split('@')[0];
       setUsername(extractedUsername);
+    } else {
+      setUsername('');  // və ya default dəyər
     }
   }, []);
 
@@ -79,7 +92,7 @@ const Text_Input = () => {
       <header className="flex justify-end items-center gap-4 md:gap-6 pt-4 md:pt-10">
         <div className="bg-blue rounded-full px-4 py-2 md:px-6 md:py-2.5">
           <span className="text-white text-sm md:text-base whitespace-nowrap">
-            {username || 'A'}
+            {username || 'İstifadəçi'}
           </span>
         </div>
         <Link 

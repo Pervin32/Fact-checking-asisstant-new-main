@@ -136,18 +136,46 @@ const Registration = () => {
     signInWithPopup(auth, facebookProvider)
       .then((result) => {
         const user = result.user;
-        localStorage.setItem('userEmail', user.email);
+        
+        // Debug üçün bütün məlumatları log edək
+        console.log("Full Facebook response:", result);
+        console.log("User data:", {
+          displayName: user.displayName,
+          email: user.email,
+          providerData: user.providerData
+        });
+  
+        // Facebook provider data-nı əldə edək
+        const fbData = user.providerData.find(p => p.providerId === 'facebook.com');
+        console.log("Facebook specific data:", fbData);
+  
+        // İstifadəçi adını təyin edək
+        const displayName = user.displayName || fbData?.displayName || 'Facebook User';
+        
+        // localStorage-a yazmadan əvvəl string-ə çevirək
+        localStorage.setItem('userEmail', String(user.email || ''));
+        localStorage.setItem('facebookProfile', String(displayName));
+        
+        console.log("Saved to localStorage:", {
+          email: localStorage.getItem('userEmail'),
+          profile: localStorage.getItem('facebookProfile')
+        });
+  
         toast.success('Facebook ilə qeydiyyatdan keçdiniz!', { position: "top-right" });
         navigate('/textinput');
       })
       .catch((error) => {
+        console.error("Facebook login error:", error);
+        console.error("Error details:", {
+          code: error.code,
+          message: error.message
+        });
         toast.error('Facebook ilə qeydiyyat zamanı xəta baş verdi.', { position: "top-right" });
       })
       .finally(() => {
         setIsLoading(false);
       });
   };
-
   return (
     <div className='w-full max-w-lg mx-auto pt-10 pb-16 px-4 flex items-center justify-center mt-[0px] sm:mt-[130px]'>
       <div className='flex flex-col items-center justify-center w-full sm:w-[361px]'>
