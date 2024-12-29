@@ -38,7 +38,7 @@ const Login = () => {
     const handleLogin = async (e) => {
         e.preventDefault();
         setIsLoading(true);
-
+    
         if (!email || !password) {
             toast.warn('Zəhmət olmasa e-poçtunuzu və parolunuzu daxil edin.', {
                 position: "top-right",
@@ -47,19 +47,27 @@ const Login = () => {
             setIsLoading(false);
             return;
         }
-
+    
         try {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
             
+            // Köhnə məlumatları təmizləyirik
+            localStorage.clear();
+            
+            // Email-dən istifadəçi adını əldə edirik
+            const emailUsername = email.split('@')[0];
+            
             // İstifadəçi məlumatlarını localStorage-də saxlayırıq
+            localStorage.setItem('authType', 'email');
             localStorage.setItem('userEmail', user.email);
+            localStorage.setItem('userName', emailUsername);
             
             toast.success('Daxil olma uğurlu oldu!', {
                 position: "top-right",
                 autoClose: 2000,
             });
-
+    
             setTimeout(() => {
                 navigate('/textinput');
             }, 2000);
@@ -95,21 +103,32 @@ const Login = () => {
             setIsLoading(false);
         }
     };
-
+    
     const handleGoogleSignIn = async () => {
         setIsLoading(true);
         try {
             console.log('Google sign-in başladı');
             const provider = new GoogleAuthProvider();
-            provider.addScope('profile'); // Əlavə edildi
-            provider.addScope('email');   // Əlavə edildi
+            provider.addScope('profile');
+            provider.addScope('email');
             
             const result = await signInWithPopup(auth, provider);
-            console.log('Google auth result:', result);
             
+            // Köhnə məlumatları təmizləyirik
+            localStorage.clear();
+            
+            // Google məlumatlarını saxlayırıq
+            localStorage.setItem('authType', 'google');
             localStorage.setItem('userEmail', result.user.email);
-            toast.success('Google ilə daxil oldunuz!');
-            navigate('/textinput');
+            localStorage.setItem('userName', result.user.displayName);
+    
+            toast.success('Google ilə daxil oldunuz!', {
+                position: "top-right",
+                autoClose: 2000,
+            });
+            setTimeout(() => {
+                navigate('/textinput');
+            }, 2000);
         } catch (error) {
             console.error('Dəqiq xəta:', error);
             toast.error(`Xəta: ${error.message}`);
@@ -117,13 +136,21 @@ const Login = () => {
             setIsLoading(false);
         }
     };
-
+    
     const handleFacebookSignIn = async () => {
         setIsLoading(true);
         const provider = new FacebookAuthProvider();
         try {
             const result = await signInWithPopup(auth, provider);
+            
+            // Köhnə məlumatları təmizləyirik
+            localStorage.clear();
+            
+            // Facebook məlumatlarını saxlayırıq
+            localStorage.setItem('authType', 'facebook');
             localStorage.setItem('userEmail', result.user.email);
+            localStorage.setItem('userName', result.user.displayName);
+            
             toast.success('Facebook ilə daxil oldunuz!', {
                 position: "top-right",
                 autoClose: 2000,
@@ -132,6 +159,7 @@ const Login = () => {
                 navigate('/textinput');
             }, 2000);
         } catch (error) {
+            console.error('Facebook login error:', error);
             toast.error('Facebook ilə daxil olma zamanı xəta baş verdi.', {
                 position: "top-right",
                 autoClose: 3000,
@@ -140,7 +168,6 @@ const Login = () => {
             setIsLoading(false);
         }
     };
-
     return (
         <div className='w-full max-w-lg mx-auto pt-10 pb-16 px-4 flex items-center justify-center mt-[130px]'>
             <div className='flex flex-col items-center justify-center w-[361px]'>

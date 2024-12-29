@@ -1,6 +1,13 @@
+// React və React kitabxanasından lazımlı funksiyaları idxal edirik.
 import React, { useState } from 'react';
+
+// react-toastify kitabxanasından ToastContainer və toast funksiyasını idxal edirik.
 import { ToastContainer, toast } from 'react-toastify';
+
+// react-router-dom kitabxanasından Link və useNavigate funksiyalarını idxal edirik.
 import { Link, useNavigate } from 'react-router-dom';
+
+// firebase kitabxanasından lazımlı autentifikasiya funksiyalarını idxal edirik.
 import { 
   getAuth, 
   signInWithPopup, 
@@ -9,14 +16,18 @@ import {
   createUserWithEmailAndPassword
 } from 'firebase/auth';
 
+// Toastify kitabxanasının CSS faylını idxal edirik.
 import 'react-toastify/dist/ReactToastify.css';
 
+// Google və Facebook üçün şəkilləri idxal edirik.
 import google from '../assets/img/gmail.svg';
 import facebook from '../assets/img/face.svg';
 
+// Firebase tətbiqetməsini işə salmaq üçün lazımlı funksiyaları idxal edirik.
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 
+// Firebase konfiqurasiyasını təyin edirik.
 const firebaseConfig = {
   apiKey: "AIzaSyAqsWZ5_ri2DBim6cgtMn2ir9w8t3XXa-8",
   authDomain: "fact-checking-asisstant.firebaseapp.com",
@@ -27,174 +38,166 @@ const firebaseConfig = {
   measurementId: "G-BLQXDLD0PP"
 };
 
-// Initialize Firebase
+// Firebase tətbiqini başladırıq.
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 
+// Registration komponentini yaradırıq.
 const Registration = () => {
+  // İstifadəçi məlumatları üçün state dəyişənləri təyin edirik.
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  
+
+  // Naviqasiya funksiyası üçün useNavigate hook-unu istifadə edirik.
   const navigate = useNavigate();
+
+  // Firebase autentifikasiya obyektini və provider-ləri yaradırıq.
   const auth = getAuth();
   const googleProvider = new GoogleAuthProvider();
   const facebookProvider = new FacebookAuthProvider();
 
-  // All handlers remain exactly the same
-  const handleRegister = async (e) => {
-    e.preventDefault();
+  // İstifadəçi qeydiyyatını idarə edən funksiya.
+  // handleRegister funksiyasını bu şəkildə yeniləyirik
+const handleRegister = async (e) => {
+  e.preventDefault();
+  
+  if (!email || !password || !confirmPassword) {
+    toast.warn('Zəhmət olmasa bütün sahələri doldurun.', {
+      position: "top-right",
+      autoClose: 3000,
+    });
+    return;
+  }
+
+  if (password !== confirmPassword) {
+    toast.error('Parollar uyğun gəlmir.', {
+      position: "top-right",
+      autoClose: 3000,
+    });
+    return;
+  }
+
+  if (password.length < 6) {
+    toast.error('Parol ən azı 6 simvol olmalıdır.', {
+      position: "top-right",
+      autoClose: 3000,
+    });
+    return;
+  }
+
+  setIsLoading(true);
+
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
     
-    if (!email || !password || !confirmPassword) {
-      toast.warn('Zəhmət olmasa bütün sahələri doldurun.', {
-        position: "top-right",
-        autoClose: 3000,
-      });
-      return;
+    // Köhnə məlumatları təmizləyirik
+    localStorage.clear();
+    
+    // Email-dən istifadəçi adını əldə edirik
+    const emailUsername = email.split('@')[0];
+    
+    // Məlumatları localStorage-da saxlayırıq
+    localStorage.setItem('authType', 'email');
+    localStorage.setItem('userEmail', user.email);
+    localStorage.setItem('userName', emailUsername);
+
+    toast.success('Qeydiyyat uğurla tamamlandı!', {
+      position: "top-right",
+      autoClose: 3000,
+    });
+
+    setTimeout(() => {
+      navigate('/textinput');
+    }, 1000);
+
+  } catch (error) {
+    console.error('Registration error:', error);
+    
+    switch (error.code) {
+      case 'auth/email-already-in-use':
+        toast.error('Bu email artıq istifadə olunub.', {
+          position: "top-right",
+          autoClose: 3000,
+        });
+        break;
+      case 'auth/invalid-email':
+        toast.error('Düzgün email formatı deyil.', {
+          position: "top-right",
+          autoClose: 3000,
+        });
+        break;
+      default:
+        toast.error('Qeydiyyat zamanı xəta baş verdi.', {
+          position: "top-right",
+          autoClose: 3000,
+        });
     }
+  } finally {
+    setIsLoading(false);
+  }
+};
 
-    if (password !== confirmPassword) {
-      toast.error('Parollar uyğun gəlmir.', {
-        position: "top-right",
-        autoClose: 3000,
-      });
-      return;
-    }
-
-    if (password.length < 6) {
-      toast.error('Parol ən azı 6 simvol olmalıdır.', {
-        position: "top-right",
-        autoClose: 3000,
-      });
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
+// Google signin funksiyasını yeniləyirik
+const handleGoogleSignIn = () => {
+  setIsLoading(true);
+  signInWithPopup(auth, googleProvider)
+    .then((result) => {
+      const user = result.user;
       
+      localStorage.clear();
+      localStorage.setItem('authType', 'google');
       localStorage.setItem('userEmail', user.email);
+      localStorage.setItem('userName', user.displayName || user.email.split('@')[0]);
 
-      toast.success('Qeydiyyat uğurla tamamlandı!', {
+      toast.success('Google ilə qeydiyyatdan keçdiniz!', {
         position: "top-right",
-        autoClose: 3000,
+        autoClose: 2000,
       });
-
       setTimeout(() => {
         navigate('/textinput');
-      }, 1000);
-
-    } catch (error) {
-      console.error('Registration error:', error);
-      
-      switch (error.code) {
-        case 'auth/email-already-in-use':
-          toast.error('Bu email artıq istifadə olunub.', {
-            position: "top-right",
-            autoClose: 3000,
-          });
-          break;
-        case 'auth/invalid-email':
-          toast.error('Düzgün email formatı deyil.', {
-            position: "top-right",
-            autoClose: 3000,
-          });
-          break;
-        default:
-          toast.error('Qeydiyyat zamanı xəta baş verdi.', {
-            position: "top-right",
-            autoClose: 3000,
-          });
-      }
-    } finally {
+      }, 2000);
+    })
+    .catch((error) => {
+      console.error("Google login error:", error);
+      toast.error('Google ilə qeydiyyat zamanı xəta baş verdi.', { position: "top-right" });
+    })
+    .finally(() => {
       setIsLoading(false);
-    }
-  };
+    });
+};
 
-  const handleGoogleSignIn = () => {
-    setIsLoading(true);
-    signInWithPopup(auth, googleProvider)
-      .then((result) => {
-        const user = result.user;
-        
-        // Clear old data
-        localStorage.clear();
-        
-        // Save both email and display name
-        localStorage.setItem('authType', 'google');
-        localStorage.setItem('userEmail', String(user.email || ''));
-        localStorage.setItem('userName', String(user.displayName || user.email.split('@')[0]));
-        
-        console.log("Saved to localStorage:", {
-          authType: localStorage.getItem('authType'),
-          email: localStorage.getItem('userEmail'),
-          name: localStorage.getItem('userName')
-        });
-  
-        toast.success('Google ilə qeydiyyatdan keçdiniz!', { position: "top-right" });
-        navigate('/textinput');
-      })
-      .catch((error) => {
-        console.error("Google login error:", error);
-        toast.error('Google ilə qeydiyyat zamanı xəta baş verdi.', { position: "top-right" });
-      })
-      .finally(() => {
-        setIsLoading(false);
+// Facebook signin funksiyasını yeniləyirik
+const handleFacebookSignIn = () => {
+  setIsLoading(true);
+  signInWithPopup(auth, facebookProvider)
+    .then((result) => {
+      const user = result.user;
+      
+      localStorage.clear();
+      localStorage.setItem('authType', 'facebook');
+      localStorage.setItem('userEmail', user.email);
+      localStorage.setItem('userName', user.displayName);
+
+      toast.success('Facebook ilə qeydiyyatdan keçdiniz!', {
+        position: "top-right",
+        autoClose: 2000,
       });
-  };
-  const handleFacebookSignIn = () => {
-    setIsLoading(true);
-    signInWithPopup(auth, facebookProvider)
-      .then((result) => {
-        const user = result.user;
-        
-        // Debug üçün bütün məlumatları log edək
-        console.log("Full Facebook response:", result);
-        console.log("User data:", {
-          displayName: user.displayName,
-          email: user.email,
-          providerData: user.providerData
-        });
-  
-        // Facebook provider data-nı əldə edək
-        const fbData = user.providerData.find(p => p.providerId === 'facebook.com');
-        console.log("Facebook specific data:", fbData);
-  
-        // İstifadəçi adını təyin edək
-        const displayName = user.displayName || fbData?.displayName || 'Facebook User';
-        
-        // Əvvəlcə köhnə məlumatları təmizləyək
-        localStorage.clear();
-        
-        // Yeni məlumatları əlavə edək
-        localStorage.setItem('authType', 'facebook'); // Auth type-ı əlavə edirik
-        localStorage.setItem('userEmail', String(user.email || ''));
-        localStorage.setItem('facebookProfile', String(displayName));
-        
-        console.log("Saved to localStorage:", {
-          authType: localStorage.getItem('authType'),
-          email: localStorage.getItem('userEmail'),
-          profile: localStorage.getItem('facebookProfile')
-        });
-  
-        toast.success('Facebook ilə qeydiyyatdan keçdiniz!', { position: "top-right" });
+      setTimeout(() => {
         navigate('/textinput');
-      })
-      .catch((error) => {
-        console.error("Facebook login error:", error);
-        console.error("Error details:", {
-          code: error.code,
-          message: error.message
-        });
-        toast.error('Facebook ilə qeydiyyat zamanı xəta baş verdi.', { position: "top-right" });
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  };
+      }, 2000);
+    })
+    .catch((error) => {
+      console.error("Facebook login error:", error);
+      toast.error('Facebook ilə qeydiyyat zamanı xəta baş verdi.', { position: "top-right" });
+    })
+    .finally(() => {
+      setIsLoading(false);
+    });
+};
+  // Komponentin render hissəsi.
   return (
     <div className='w-full max-w-lg mx-auto pt-10 pb-16 px-4 flex items-center justify-center mt-[0px] sm:mt-[130px]'>
       <div className='flex flex-col items-center justify-center w-full sm:w-[361px]'>
@@ -202,6 +205,7 @@ const Registration = () => {
           Hesabınızı yaradın
         </h1>
 
+        {/* Qeydiyyat formu */}
         <form onSubmit={handleRegister} className="w-full">
           <div className='grid grid-rows gap-[6px] mb-[12px]'>
             <label className="text-black text-sm font-medium font-montserrat">E-mail</label>
