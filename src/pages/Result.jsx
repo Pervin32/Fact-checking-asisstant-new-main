@@ -11,6 +11,13 @@ const getCategoryScore = (score) => {
     return 'text-red-500';
 };
 
+const getCategoryBackgroundColor = (score) => {
+    if (score === 0) return 'bg-black';
+    if (score >= 80) return 'bg-green-500';
+    if (score >= 60) return 'bg-yellow-500';
+    return 'bg-red-500';
+};
+
 const getDateCategory = (date) => {
     const today = new Date();
     const searchDate = new Date(date);
@@ -18,7 +25,6 @@ const getDateCategory = (date) => {
 
     if (daysDiff <= 7) return 'Son 7 gün';
     if (daysDiff <= 30) return 'Son 30 gün';
-
     return `${searchDate.toLocaleString('default', { month: 'long' })} ${searchDate.getFullYear()}`;
 };
 
@@ -26,71 +32,121 @@ const Result = ({ searchHistory = [] }) => {
     const location = useLocation();
     const [groupedHistory, setGroupedHistory] = useState({});
     const [latestSearch, setLatestSearch] = useState({ text: null, url: null });
-    const [score, setScore] = useState(location.state?.score || 0);
+    const [score, setScore] = useState(() => 
+        parseInt(localStorage.getItem('currentScore')) || location.state?.score || 0
+    );
     const [apiResponse, setApiResponse] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState(null);
     const [username, setUsername] = useState('');
+    const [currentSearchText, setCurrentSearchText] = useState(() => 
+        localStorage.getItem('currentSearchText') || location.state?.searchText || ''
+    );
+    const [isNewSearch, setIsNewSearch] = useState(true);
 
     useEffect(() => {
-        // localStorage-dan userName-i alırıq
         const storedUsername = localStorage.getItem('userName');
-        const authType = localStorage.getItem('authType');
         
         if (storedUsername) {
             setUsername(storedUsername);
         } else {
-            // Əgər userName yoxdursa, email-dən istifadə edirik
             const userEmail = localStorage.getItem('userEmail');
             if (userEmail) {
                 const extractedUsername = userEmail.split('@')[0];
                 setUsername(extractedUsername);
             } else {
-                // Heç bir məlumat yoxdursa default olaraq 'A' hərfini göstəririk
                 setUsername('İstifadəçi');
             }
         }
     }, []);
+
     useEffect(() => {
         const fetchFactCheck = async () => {
+            if (!currentSearchText) return;
+
+            setIsLoading(true);
+            setError(null);
+
             try {
-                const searchText = location.state?.searchText || "";
+                const existingHistory = JSON.parse(localStorage.getItem('searchHistory') || '[]');
+                const searchExists = existingHistory.some(item => item.text === currentSearchText);
 
                 const response = await fetch('https://fact-checking-assistant.onrender.com/factcheck', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ fact: searchText }),
+                    body: JSON.stringify({ fact: currentSearchText }),
                 });
                 
                 if (!response.ok) {
-                    throw new Error('API request failed');
+                    throw new Error(`API xətası: ${response.status}`);
                 }
 
                 const data = await response.json();
                 setApiResponse(data);
-                setScore(data.score || 0);
+                
+                const newScore = data.score || 0;
+                setScore(newScore);
+                localStorage.setItem('currentScore', newScore.toString());
+
+                if (isNewSearch && !searchExists) {
+                    const newSearch = {
+                        text: currentSearchText,
+                        date: new Date().toISOString(),
+                        score: newScore
+                    };
+
+                    const updatedHistory = [newSearch, ...existingHistory];
+                    localStorage.setItem('searchHistory', JSON.stringify(updatedHistory));
+                }
+
+                loadSearchHistory();
+
             } catch (error) {
-                console.error('Full error details:', error);
+                setError(error.message);
                 setScore(0);
+                localStorage.setItem('currentScore', '0');
+                console.error('Xəta:', error);
+            } finally {
+                setIsLoading(false);
             }
         };
 
-        if (Array.isArray(searchHistory) && searchHistory.length > 0) {
-            const grouped = searchHistory.reduce((acc, item) => {
-                const category = getDateCategory(item.date);
-                acc[category] = acc[category] || [];
-                acc[category].push(item);
-                return acc;
-            }, {});
-            setGroupedHistory(grouped);
-
-            const allSearches = Object.values(grouped).flat();
-            const latest = allSearches[allSearches.length - 1];
-            setLatestSearch({ text: latest.text, url: latest.url });
+        if (currentSearchText) {
+            fetchFactCheck();
         }
+        loadSearchHistory();
+    }, [currentSearchText, isNewSearch]);
 
+    const loadSearchHistory = () => {
+        const savedHistory = JSON.parse(localStorage.getItem('searchHistory') || '[]');
         
-    }, [searchHistory, location.state]);
+        const sortedHistory = savedHistory.sort((a, b) => 
+            new Date(b.date) - new Date(a.date)
+        );
+
+        const grouped = sortedHistory.reduce((acc, item) => {
+            const category = getDateCategory(item.date);
+            if (!acc[category]) {
+                acc[category] = [];
+            }
+            acc[category].push(item);
+            return acc;
+        }, {});
+
+        setGroupedHistory(grouped);
+
+        if (sortedHistory.length > 0) {
+            setLatestSearch({ text: sortedHistory[0].text, url: sortedHistory[0].url });
+        }
+    };
+
+    const clearHistory = () => {
+        localStorage.removeItem('searchHistory');
+        setGroupedHistory({});
+        setLatestSearch({ text: null, url: null });
+    };
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-[268px_1fr] min-h-screen">
@@ -106,23 +162,36 @@ const Result = ({ searchHistory = [] }) => {
 
                 <div className="pr-2 md:pr-[23px] overflow-y-auto max-h-[calc(100vh-120px)] md:max-h-[calc(100vh-180px)]">
                     {Object.keys(groupedHistory).length ? (
-                        Object.keys(groupedHistory).map((category, index) => (
-                            <div key={index}>
-                                <h3 className="font-bold mb-2 text-xs md:text-sm">{category}</h3>
-                                <ul className="space-y-2 mb-4 md:mb-6">
-                                    {groupedHistory[category].map((item, idx) => (
-                                        <li key={idx} className="p-2 rounded-md cursor-pointer">
-                                            <p className="text-xs md:text-sm text-ellipsis overflow-hidden whitespace-nowrap">
-                                                {item.text}
-                                            </p>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        ))
+                        Object.keys(groupedHistory)
+                            .sort((a, b) => {
+                                const order = { 'Son 7 gün': 3, 'Son 30 gün': 2 };
+                                return (order[b] || 1) - (order[a] || 1);
+                            })
+                            .map((category, index) => (
+                                <div key={index}>
+                                    <h3 className="font-bold mb-2 text-xs md:text-sm">{category}</h3>
+                                    <ul className="space-y-2 mb-4 md:mb-6">
+                                        {groupedHistory[category].map((item, idx) => (
+                                            <li 
+                                                key={idx} 
+                                                className="p-2 rounded-md cursor-pointer hover:bg-gray-100"
+                                                onClick={() => {
+                                                    setIsNewSearch(false);
+                                                    setCurrentSearchText(item.text);
+                                                    localStorage.setItem('currentSearchText', item.text);
+                                                }}
+                                            >
+                                                <p className="text-xs md:text-sm text-ellipsis overflow-hidden whitespace-nowrap">
+                                                    {item.text}
+                                                </p>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            ))
                     ) : (
                         <p className="text-xs md:text-sm">
-                            {location.state?.searchText || "Hələ axtarış yoxdur."}
+                            {currentSearchText || "Hələ axtarış yoxdur."}
                         </p>
                     )}
                 </div>
@@ -141,22 +210,28 @@ const Result = ({ searchHistory = [] }) => {
                 </section>
 
                 <div className="flex flex-col text-center flex-grow p-4 md:p-6">
-                    <div className="mt-[50px] md:mt-[74px] text-center w-[200px] md:w-[246px] h-[27px] rounded-[17px] mx-auto bg-red-400"></div>
+                    {isLoading && (
+                        <div className="mt-4 text-center">Yüklənir...</div>
+                    )}
+                    {error && (
+                        <div className="mt-4 text-red-500 text-center">{error}</div>
+                    )}
+                    <div className={`mt-[30px] md:mt-[53px] text-center w-[200px] md:w-[246px] h-[27px] rounded-[17px] mx-auto ${getCategoryBackgroundColor(score)}`}></div>
                     <div className="mb-8 md:mb-12 mt-[30px] md:mt-[53px] flex flex-col justify-center items-center text-center">
                         <div className={`font-semibold border-t border-black w-[200px] md:w-[234px] text-4xl md:text-5xl leading-[60px] md:leading-[72px] mx-auto pt-[19px] ${getCategoryScore(score)}`}>
                             {score}
                         </div>
                         <h2 className="text-lg md:text-xl font-semibold mb-2">Ümumi bal</h2>
-                        <div className="mt-4 p-2 rounded-md text-center">
-                            <p className="text-sm md:text-[15px] leading-6 w-full md:w-[576px] mx-auto px-4 md:px-0">
-                                {location.state?.searchText || latestSearch.text || "Hələ axtarış yoxdur."}
-                            </p>
-                            {latestSearch.url && (
-                                <a href={latestSearch.url} className="text-blue-500 text-xs md:text-sm mt-1 block break-all">
-                                    {latestSearch.url}
-                                </a>
-                            )}
-                        </div>
+                    </div>
+                    <div className="mt-4 p-2 rounded-md text-center">
+                        <p className="text-sm md:text-[15px] leading-6 w-full md:w-[576px] mx-auto px-4 md:px-0">
+                            {currentSearchText || latestSearch.text || "Hələ axtarış yoxdur."}
+                        </p>
+                        {latestSearch.url && (
+                            <a href={latestSearch.url} className="text-blue-500 text-xs md:text-sm mt-1 block break-all">
+                                {latestSearch.url}
+                            </a>
+                        )}
                     </div>
                 </div>
             </div>

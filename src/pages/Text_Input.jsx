@@ -11,7 +11,6 @@ const Text_Input = () => {
   useEffect(() => {
     console.log('Component mounted, checking auth data...');
 
-    // Get auth data
     const facebookProfile = localStorage.getItem('facebookProfile');
     const userName = localStorage.getItem('userName');
     const userEmail = localStorage.getItem('userEmail');
@@ -22,7 +21,6 @@ const Text_Input = () => {
       userEmail
     });
 
-    // Priority order: userName (from Google) > facebookProfile > email > default
     if (userName && userName !== 'null') {
       console.log('Using stored userName:', userName);
       setUsername(userName);
@@ -41,11 +39,25 @@ const Text_Input = () => {
       setUsername('İstifadəçi');
     }
   }, []);
+
   const handleSearch = async () => {
     if (searchText.trim() === '') return;
 
     try {
       setIsLoading(true);
+
+      // Store the search text for Result component
+      localStorage.setItem('currentSearchText', searchText);
+
+      // Update search history
+      const searchHistory = JSON.parse(localStorage.getItem('searchHistory') || '[]');
+      const newSearch = {
+        text: searchText,
+        date: new Date().toISOString(),
+        score: 0
+      };
+      searchHistory.push(newSearch);
+      localStorage.setItem('searchHistory', JSON.stringify(searchHistory));
 
       const mockApiResponse = {
         score: 0,
@@ -66,6 +78,10 @@ const Text_Input = () => {
           recommendations: mockApiResponse.recommendations,
         };
 
+        // Texterea-ni temizle
+        setSearchText('');
+        localStorage.removeItem('currentSearchText');
+        
         navigate('/result', { state: loadingData });
       }, 3000);
     } catch (error) {
@@ -97,9 +113,13 @@ const Text_Input = () => {
     }
   };
 
+  const handleTextChange = (e) => {
+    const newText = e.target.value;
+    setSearchText(newText);
+  };
+
   return (
     <div className="min-h-screen w-full px-4 md:px-6 lg:px-8">
-      {/* Header Section */}
       <header className="flex justify-end items-center gap-4 md:gap-6 pt-4 md:pt-10">
         <div className="bg-blue rounded-full px-4 py-2 md:px-6 md:py-2.5">
           <span className="text-white text-sm md:text-base whitespace-nowrap">
@@ -114,7 +134,6 @@ const Text_Input = () => {
         </Link>
       </header>
 
-      {/* Search Section */}
       <main className="flex items-center justify-center w-full mt-16 md:mt-32 lg:mt-40">
         <div className="w-full max-w-2xl mx-auto">
           <div className="relative flex items-center w-full">
@@ -127,12 +146,10 @@ const Text_Input = () => {
              transition-all duration-200 ease-in-out
              disabled:bg-gray-50 disabled:cursor-not-allowed"
               value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
+              onChange={handleTextChange}
               onKeyDown={handleKeyPress}
               disabled={isLoading}
             />
-
-
           </div>
         </div>
       </main>
