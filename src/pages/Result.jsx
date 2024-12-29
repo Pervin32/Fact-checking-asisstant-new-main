@@ -28,16 +28,27 @@ const Result = ({ searchHistory = [] }) => {
     const [latestSearch, setLatestSearch] = useState({ text: null, url: null });
     const [score, setScore] = useState(location.state?.score || 0);
     const [apiResponse, setApiResponse] = useState(null);
-    const [username, setUsername] = useState('A');
+    const [username, setUsername] = useState('');
 
     useEffect(() => {
-        const userEmail = localStorage.getItem('userEmail');
-        if (userEmail) {
-            const extractedUsername = userEmail.split('@')[0];
-            setUsername(extractedUsername);
+        // localStorage-dan userName-i alırıq
+        const storedUsername = localStorage.getItem('userName');
+        const authType = localStorage.getItem('authType');
+        
+        if (storedUsername) {
+            setUsername(storedUsername);
+        } else {
+            // Əgər userName yoxdursa, email-dən istifadə edirik
+            const userEmail = localStorage.getItem('userEmail');
+            if (userEmail) {
+                const extractedUsername = userEmail.split('@')[0];
+                setUsername(extractedUsername);
+            } else {
+                // Heç bir məlumat yoxdursa default olaraq 'A' hərfini göstəririk
+                setUsername('A');
+            }
         }
     }, []);
-
     useEffect(() => {
         const fetchFactCheck = async () => {
             try {
@@ -119,11 +130,11 @@ const Result = ({ searchHistory = [] }) => {
 
             <div className="flex flex-col min-h-full">
                 <section className="flex justify-end gap-4 p-4 md:pt-10 md:pr-8 bg-white">
-                <div className="bg-blue rounded-full px-4 py-2 md:px-6 md:py-2.5">
-          <span className="text-white text-sm md:text-base whitespace-nowrap">
-            {username || 'A'}
-          </span>
-        </div>
+                    <div className="bg-blue rounded-full px-4 py-2 md:px-6 md:py-2.5">
+                        <span className="text-white text-sm md:text-base whitespace-nowrap">
+                            {username}
+                        </span>
+                    </div>
                     <Link to="/registration">
                         <img src={enter} alt="enter" className="w-8 h-8 md:w-9 md:h-9" />
                     </Link>
