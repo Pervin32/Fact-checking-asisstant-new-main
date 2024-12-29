@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import enter from '@/assets/img/enter.svg';
 
-
 const Text_Input = () => {
   const [searchText, setSearchText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -10,26 +9,38 @@ const Text_Input = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // localStorage-dan məlumatları alaq
-    const userEmail = localStorage.getItem('userEmail');
-    const facebookProfile = localStorage.getItem('facebookProfile');
+    console.log('Component mounted, checking auth data...');
     
-    console.log('Raw localStorage data:', {
-      userEmail,
-      facebookProfile
+    // Get auth data
+    const facebookProfile = localStorage.getItem('facebookProfile');
+    const userName = localStorage.getItem('userName');
+    const userEmail = localStorage.getItem('userEmail');
+    
+    console.log('Auth data from localStorage:', {
+      facebookProfile,
+      userName,
+      userEmail
     });
   
-    // null string-ini yoxlayaq
-    if (facebookProfile && facebookProfile !== 'null') {
+    // Priority order: userName (from Google) > facebookProfile > email > default
+    if (userName && userName !== 'null') {
+      console.log('Using stored userName:', userName);
+      setUsername(userName);
+    }
+    else if (facebookProfile && facebookProfile !== 'null') {
+      console.log('Using Facebook profile:', facebookProfile);
       setUsername(facebookProfile);
-    } else if (userEmail && userEmail !== 'null') {
+    }
+    else if (userEmail && userEmail !== 'null') {
+      console.log('Using email as fallback:', userEmail);
       const extractedUsername = userEmail.split('@')[0];
       setUsername(extractedUsername);
-    } else {
-      setUsername('');  // və ya default dəyər
+    }
+    else {
+      console.log('No valid auth data found, using default');
+      setUsername('İstifadəçi');
     }
   }, []);
-
   const handleSearch = async () => {
     if (searchText.trim() === '') return;
 
@@ -92,14 +103,14 @@ const Text_Input = () => {
       <header className="flex justify-end items-center gap-4 md:gap-6 pt-4 md:pt-10">
         <div className="bg-blue rounded-full px-4 py-2 md:px-6 md:py-2.5">
           <span className="text-white text-sm md:text-base whitespace-nowrap">
-            {username || 'İstifadəçi'}
+            {username}
           </span>
         </div>
         <Link 
           to="/registration" 
           className="flex items-center justify-center w-8 h-8 md:w-9 md:h-9"
         >
-           <img src={enter} alt="enter" className="w-8 h-8 md:w-9 md:h-9" />
+          <img src={enter} alt="enter" className="w-8 h-8 md:w-9 md:h-9" />
         </Link>
       </header>
 

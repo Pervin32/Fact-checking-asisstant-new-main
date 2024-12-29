@@ -119,18 +119,32 @@ const Registration = () => {
     signInWithPopup(auth, googleProvider)
       .then((result) => {
         const user = result.user;
-        localStorage.setItem('userEmail', user.email);
+        
+        // Clear old data
+        localStorage.clear();
+        
+        // Save both email and display name
+        localStorage.setItem('authType', 'google');
+        localStorage.setItem('userEmail', String(user.email || ''));
+        localStorage.setItem('userName', String(user.displayName || user.email.split('@')[0]));
+        
+        console.log("Saved to localStorage:", {
+          authType: localStorage.getItem('authType'),
+          email: localStorage.getItem('userEmail'),
+          name: localStorage.getItem('userName')
+        });
+  
         toast.success('Google ilə qeydiyyatdan keçdiniz!', { position: "top-right" });
         navigate('/textinput');
       })
       .catch((error) => {
+        console.error("Google login error:", error);
         toast.error('Google ilə qeydiyyat zamanı xəta baş verdi.', { position: "top-right" });
       })
       .finally(() => {
         setIsLoading(false);
       });
   };
-
   const handleFacebookSignIn = () => {
     setIsLoading(true);
     signInWithPopup(auth, facebookProvider)
@@ -152,11 +166,16 @@ const Registration = () => {
         // İstifadəçi adını təyin edək
         const displayName = user.displayName || fbData?.displayName || 'Facebook User';
         
-        // localStorage-a yazmadan əvvəl string-ə çevirək
+        // Əvvəlcə köhnə məlumatları təmizləyək
+        localStorage.clear();
+        
+        // Yeni məlumatları əlavə edək
+        localStorage.setItem('authType', 'facebook'); // Auth type-ı əlavə edirik
         localStorage.setItem('userEmail', String(user.email || ''));
         localStorage.setItem('facebookProfile', String(displayName));
         
         console.log("Saved to localStorage:", {
+          authType: localStorage.getItem('authType'),
           email: localStorage.getItem('userEmail'),
           profile: localStorage.getItem('facebookProfile')
         });
