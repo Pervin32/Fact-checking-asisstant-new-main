@@ -7,12 +7,12 @@ const Navbar = ({ onPrinsiplerimizClick, onAboutClick, onWhoWeAreClick }) => {
     return (
         <div className="flex flex-wrap items-center justify-between w-full  mt-4 lg:mt-12 gap-4 md:gap-8 px-4 md:px-8 text-sm border-b pb-4">
             {/* Logo */}
-            <Link to="/" className="bg-[#DEDEDE] w-40 h-9 flex items-center pl-8">
+            <Link to="/" className="bg-[#DEDEDE] w-40 h-9 flex items-center mx-auto md:mx-0 pl-8">
                 <img src={logo} alt="logo" />
             </Link>
 
             {/* Main Links */}
-            <div className="flex justify-between items-center gap-2 md:gap-10 sm:gap-6 font-medium whitespace-nowrap">
+            <div className="flex justify-between items-center gap-16 md:gap-40 sm:gap-20 font-medium whitespace-nowrap">
                 <button onClick={onPrinsiplerimizClick} className="cursor-pointer">
                 Prinsiplərimiz
                 </button>

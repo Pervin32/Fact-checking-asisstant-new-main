@@ -10,18 +10,18 @@ const Text_Input = () => {
 
   useEffect(() => {
     console.log('Component mounted, checking auth data...');
-    
+
     // Get auth data
     const facebookProfile = localStorage.getItem('facebookProfile');
     const userName = localStorage.getItem('userName');
     const userEmail = localStorage.getItem('userEmail');
-    
+
     console.log('Auth data from localStorage:', {
       facebookProfile,
       userName,
       userEmail
     });
-  
+
     // Priority order: userName (from Google) > facebookProfile > email > default
     if (userName && userName !== 'null') {
       console.log('Using stored userName:', userName);
@@ -106,8 +106,8 @@ const Text_Input = () => {
             {username}
           </span>
         </div>
-        <Link 
-          to="/registration" 
+        <Link
+          to="/registration"
           className="flex items-center justify-center w-8 h-8 md:w-9 md:h-9"
         >
           <img src={enter} alt="enter" className="w-8 h-8 md:w-9 md:h-9" />
@@ -118,21 +118,21 @@ const Text_Input = () => {
       <main className="flex items-center justify-center w-full mt-16 md:mt-32 lg:mt-40">
         <div className="w-full max-w-2xl mx-auto">
           <div className="relative flex items-center w-full">
-          <textarea
-  placeholder="İnformasiya və ya keçid linkini bura daxil edin!"
-  className="w-full h-32 md:h-36 px-4 md:px-6 py-2 md:py-3 
+            <textarea
+              placeholder="İnformasiya və ya keçid linkini bura daxil edin!"
+              className="w-full h-32 md:h-36 px-4 md:px-6 py-2 md:py-3 
              text-sm md:text-base lg:text-lg
              border border-gray-300 rounded-lg md:rounded-xl
              focus:outline-none focus:ring-2 focus:ring-blue-500
              transition-all duration-200 ease-in-out
              disabled:bg-gray-50 disabled:cursor-not-allowed"
-  value={searchText}
-  onChange={(e) => setSearchText(e.target.value)}
-  onKeyDown={handleKeyPress}
-  disabled={isLoading}
-/>
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              onKeyDown={handleKeyPress}
+              disabled={isLoading}
+            />
 
-            
+
           </div>
         </div>
       </main>

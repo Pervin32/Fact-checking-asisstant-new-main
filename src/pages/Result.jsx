@@ -45,7 +45,7 @@ const Result = ({ searchHistory = [] }) => {
                 setUsername(extractedUsername);
             } else {
                 // Heç bir məlumat yoxdursa default olaraq 'A' hərfini göstəririk
-                setUsername('A');
+                setUsername('İstifadəçi');
             }
         }
     }, []);
@@ -89,7 +89,7 @@ const Result = ({ searchHistory = [] }) => {
             setLatestSearch({ text: latest.text, url: latest.url });
         }
 
-        fetchFactCheck();
+        
     }, [searchHistory, location.state]);
 
     return (
