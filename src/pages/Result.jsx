@@ -149,7 +149,7 @@ const Result = ({ searchHistory = [] }) => {
                         <h2 className="text-lg md:text-xl font-semibold mb-2">Ümumi bal</h2>
                         <div className="mt-4 p-2 rounded-md text-center">
                             <p className="text-sm md:text-[15px] leading-6 w-full md:w-[576px] mx-auto px-4 md:px-0">
-                                {location.state?.searchText || latestSearch.text || "Daxil etdiyin mətn/link rəsmi dövlət qurumlarına, hökumət saytlarına, qanunvericilik orqanlarına və ya digər dövlət müəssisələrinə istinad edib deyə faktları etibarlı edir. Məqalədə etibarlı şəxslərdən, mövzu ilə əlaqəli mütəxəssislərin fikirlərinə yer verilib. Amma son abzasda sosial mediaya istinad edilməsi və verilmiş rəqəmlərin rəsmi mənbələrdən olmaması bəzi faktları şübhə altına ala bilir. Buna görə, diqqətli olmanı tövsiyə edirik."}
+                                {location.state?.searchText || latestSearch.text || "Hələ axtarış yoxdur."}
                             </p>
                             {latestSearch.url && (
                                 <a href={latestSearch.url} className="text-blue-500 text-xs md:text-sm mt-1 block break-all">
