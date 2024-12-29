@@ -34,7 +34,7 @@ const Main = () => {
                 </div>
 
                 {/* Video Section */}
-                <div className="flex justify-center md:justify-end ">
+                <div className="flex justify-center md:justify-end  -mt-[50px] -mb-[80px] md:mt-2 md:mb-2">
                     <VideoComponent />
                 </div>
 

@@ -6,7 +6,7 @@ const About = () => {
         <div className="montserrat grid grid-cols-1 md:grid-cols-2 gap-8 p-4 md:p-4">
             <div>
                 <section id="about">
-                    <h1 className="text-blue font-semibold text-3xl md:text-5xl mt-[-80px]  text-center md:text-start">
+                    <h1 className="text-blue font-semibold text-3xl md:text-5xl  mb-2 md:mb-0 md:-mt-[80px]  text-center md:text-start">
                         Haqqımızda
                     </h1>
                 </section>

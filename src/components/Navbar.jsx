@@ -12,7 +12,7 @@ const Navbar = ({ onPrinsiplerimizClick, onAboutClick, onWhoWeAreClick }) => {
             </Link>
 
             {/* Main Links */}
-            <div className="flex justify-between items-center gap-4 md:gap-10 sm:gap-6 font-medium whitespace-nowrap">
+            <div className="flex justify-between items-center gap-2 md:gap-10 sm:gap-6 font-medium whitespace-nowrap">
                 <button onClick={onPrinsiplerimizClick} className="cursor-pointer">
                 Prinsiplərimiz
                 </button>
