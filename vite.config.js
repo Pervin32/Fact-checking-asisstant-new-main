@@ -9,10 +9,16 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      '/factcheck': {
+      '/api': {
         target: 'https://fact-checking-assistant.onrender.com',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/factcheck/, '')
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+        configure: (proxy, options) => {
+          proxy.on('error', (err, req, res) => {
+            console.log('proxy error', err);
+          });
+        }
       }
     }
   }
