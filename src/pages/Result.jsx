@@ -1,9 +1,12 @@
+// Lazımi React komponentlərini və routing funksionallığını import edirik
 import React, { useState, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
+// Statik şəkilləri import edirik
 import logo from '@/assets/img/logo_dashboard.svg';
 import pen from '@/assets/img/pen.svg';
 import enter from '@/assets/img/enter.svg';
 
+// Balın rəngini təyin edən funksiya
 const getCategoryScore = (score) => {
     if (score === 0) return 'text-black';
     if (score >= 80) return 'text-green-500';
@@ -11,6 +14,7 @@ const getCategoryScore = (score) => {
     return 'text-red-500';
 };
 
+// Balın arxa fon rəngini təyin edən funksiya
 const getCategoryBackgroundColor = (score) => {
     if (score === 0) return 'bg-black';
     if (score >= 80) return 'bg-green-500';
@@ -18,6 +22,7 @@ const getCategoryBackgroundColor = (score) => {
     return 'bg-red-500';
 };
 
+// Tarix kateqoriyasını təyin edən funksiya
 const getDateCategory = (date) => {
     const today = new Date();
     const searchDate = new Date(date);
@@ -28,7 +33,9 @@ const getDateCategory = (date) => {
     return `${searchDate.toLocaleString('default', { month: 'long' })} ${searchDate.getFullYear()}`;
 };
 
+// Əsas Result komponenti
 const Result = ({ searchHistory = [] }) => {
+    // Router və state dəyişənlərinin təyin edilməsi
     const location = useLocation();
     const [groupedHistory, setGroupedHistory] = useState({});
     const [latestSearch, setLatestSearch] = useState({ text: null, url: null });
@@ -44,6 +51,7 @@ const Result = ({ searchHistory = [] }) => {
     );
     const [isNewSearch, setIsNewSearch] = useState(true);
 
+    // İstifadəçi adını lokaldan yükləyən effect
     useEffect(() => {
         const storedUsername = localStorage.getItem('userName');
         
@@ -60,6 +68,7 @@ const Result = ({ searchHistory = [] }) => {
         }
     }, []);
 
+    // Faktları yoxlayan API sorğusu effecti
     useEffect(() => {
         const fetchFactCheck = async () => {
             if (!currentSearchText) return;
@@ -68,9 +77,11 @@ const Result = ({ searchHistory = [] }) => {
             setError(null);
 
             try {
+                // Mövcud axtarış tarixçəsini yoxlayırıq
                 const existingHistory = JSON.parse(localStorage.getItem('searchHistory') || '[]');
                 const searchExists = existingHistory.some(item => item.text === currentSearchText);
 
+                // API sorğusu göndəririk
                 const response = await fetch('https://fact-checking-assistant.onrender.com/factcheck', {
                     method: 'POST',
                     headers: {
@@ -83,6 +94,7 @@ const Result = ({ searchHistory = [] }) => {
                     throw new Error(`API xətası: ${response.status}`);
                 }
 
+                // Cavabı emal edirik
                 const data = await response.json();
                 setApiResponse(data);
                 
@@ -90,6 +102,7 @@ const Result = ({ searchHistory = [] }) => {
                 setScore(newScore);
                 localStorage.setItem('currentScore', newScore.toString());
 
+                // Yeni axtarışı tarixçəyə əlavə edirik
                 if (isNewSearch && !searchExists) {
                     const newSearch = {
                         text: currentSearchText,
@@ -119,13 +132,16 @@ const Result = ({ searchHistory = [] }) => {
         loadSearchHistory();
     }, [currentSearchText, isNewSearch]);
 
+    // Axtarış tarixçəsini yükləyən funksiya
     const loadSearchHistory = () => {
         const savedHistory = JSON.parse(localStorage.getItem('searchHistory') || '[]');
         
+        // Tarixçəni tarixə görə sıralayırıq
         const sortedHistory = savedHistory.sort((a, b) => 
             new Date(b.date) - new Date(a.date)
         );
 
+        // Tarixçəni kateqoriyalara görə qruplaşdırırıq
         const grouped = sortedHistory.reduce((acc, item) => {
             const category = getDateCategory(item.date);
             if (!acc[category]) {
@@ -137,19 +153,23 @@ const Result = ({ searchHistory = [] }) => {
 
         setGroupedHistory(grouped);
 
+        // Son axtarışı təyin edirik
         if (sortedHistory.length > 0) {
             setLatestSearch({ text: sortedHistory[0].text, url: sortedHistory[0].url });
         }
     };
 
+    // Tarixçəni təmizləyən funksiya
     const clearHistory = () => {
         localStorage.removeItem('searchHistory');
         setGroupedHistory({});
         setLatestSearch({ text: null, url: null });
     };
 
+    // Komponentin JSX strukturu
     return (
         <div className="grid grid-cols-1 md:grid-cols-[268px_1fr] min-h-screen">
+            {/* Yan panel */}
             <aside className="p-4 md:p-9 border md:border-r border-[#C8C8C8] h-auto md:h-screen">
                 <div className="flex items-center justify-between mb-6 md:mb-12">
                     <Link to="/">
@@ -160,6 +180,7 @@ const Result = ({ searchHistory = [] }) => {
                     </Link>
                 </div>
 
+                {/* Axtarış tarixçəsi */}
                 <div className="pr-2 md:pr-[23px] overflow-y-auto max-h-[calc(100vh-120px)] md:max-h-[calc(100vh-180px)]">
                     {Object.keys(groupedHistory).length ? (
                         Object.keys(groupedHistory)
@@ -197,7 +218,9 @@ const Result = ({ searchHistory = [] }) => {
                 </div>
             </aside>
 
+            {/* Əsas məzmun */}
             <div className="flex flex-col min-h-full">
+                {/* Başlıq paneli */}
                 <section className="flex justify-end gap-4 p-4 md:pt-10 md:pr-8 bg-white">
                     <div className="bg-blue rounded-full px-4 py-2 md:px-6 md:py-2.5">
                         <span className="text-white text-sm md:text-base whitespace-nowrap">
@@ -209,6 +232,7 @@ const Result = ({ searchHistory = [] }) => {
                     </Link>
                 </section>
 
+                {/* Nəticə bölməsi */}
                 <div className="flex flex-col text-center flex-grow p-4 md:p-6">
                     {isLoading && (
                         <div className="mt-4 text-center">Yüklənir...</div>
@@ -216,6 +240,7 @@ const Result = ({ searchHistory = [] }) => {
                     {error && (
                         <div className="mt-4 text-red-500 text-center">{error}</div>
                     )}
+                    {/* Bal göstəricisi */}
                     <div className={`mt-[30px] md:mt-[53px] text-center w-[200px] md:w-[246px] h-[27px] rounded-[17px] mx-auto ${getCategoryBackgroundColor(score)}`}></div>
                     <div className="mb-8 md:mb-12 mt-[30px] md:mt-[53px] flex flex-col justify-center items-center text-center">
                         <div className={`font-semibold border-t border-black w-[200px] md:w-[234px] text-4xl md:text-5xl leading-[60px] md:leading-[72px] mx-auto pt-[19px] ${getCategoryScore(score)}`}>
@@ -223,6 +248,7 @@ const Result = ({ searchHistory = [] }) => {
                         </div>
                         <h2 className="text-lg md:text-xl font-semibold mb-2">Ümumi bal</h2>
                     </div>
+                    {/* Axtarış mətni */}
                     <div className="mt-4 p-2 rounded-md text-center">
                         <p className="text-sm md:text-[15px] leading-6 w-full md:w-[576px] mx-auto px-4 md:px-0">
                             {currentSearchText || latestSearch.text || "Hələ axtarış yoxdur."}

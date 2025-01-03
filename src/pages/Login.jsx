@@ -1,9 +1,11 @@
+// Lazımi modulları import edirik
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import google from '../assets/img/gmail.svg';
 import facebook from '../assets/img/face.svg';
+// Firebase modullarını import edirik
 import { initializeApp } from 'firebase/app';
 import { 
     getAuth, 
@@ -14,6 +16,7 @@ import {
 } from 'firebase/auth';
 import { getAnalytics } from 'firebase/analytics';
 
+// Firebase konfiqurasiyası
 const firebaseConfig = {
     apiKey: "AIzaSyAqsWZ5_ri2DBim6cgtMn2ir9w8t3XXa-8",
     authDomain: "fact-checking-asisstant.firebaseapp.com",
@@ -24,26 +27,26 @@ const firebaseConfig = {
     measurementId: "G-BLQXDLD0PP"
 };
 
-// Initialize Firebase
+// Firebase-i inizializasiya edirik
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const auth = getAuth(app);
 
 const Login = () => {
+    // State-ləri təyin edirik
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
+    // Email/Parol ilə giriş funksiyası
     const handleLogin = async (e) => {
         e.preventDefault();
         setIsLoading(true);
     
+        // Validasiya
         if (!email || !password) {
-            toast.warn('Zəhmət olmasa e-poçtunuzu və parolunuzu daxil edin.', {
-                position: "top-right",
-                autoClose: 3000,
-            });
+            toast.warn('Zəhmət olmasa e-poçtunuzu və parolunuzu daxil edin.');
             setIsLoading(false);
             return;
         }
@@ -52,131 +55,85 @@ const Login = () => {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
             
-            // Köhnə məlumatları təmizləyirik
+            // Local storage-i təmizləyib yeni məlumatları saxlayırıq
             localStorage.clear();
-            
-            // Email-dən istifadəçi adını əldə edirik
-            const emailUsername = email.split('@')[0];
-            
-            // İstifadəçi məlumatlarını localStorage-də saxlayırıq
             localStorage.setItem('authType', 'email');
             localStorage.setItem('userEmail', user.email);
-            localStorage.setItem('userName', emailUsername);
+            localStorage.setItem('userName', email.split('@')[0]);
             
-            toast.success('Daxil olma uğurlu oldu!', {
-                position: "top-right",
-                autoClose: 2000,
-            });
-    
-            setTimeout(() => {
-                navigate('/textinput');
-            }, 2000);
+            toast.success('Daxil olma uğurlu oldu!');
+            setTimeout(() => navigate('/textinput'), 2000);
         } catch (error) {
+            // Xəta mesajlarını idarə edirik
             console.error('Login error:', error);
-            
-            switch (error.code) {
-                case 'auth/user-not-found':
-                    toast.error('Bu email ilə istifadəçi tapılmadı.', {
-                        position: "top-right",
-                        autoClose: 3000,
-                    });
-                    break;
-                case 'auth/wrong-password':
-                    toast.error('Yanlış parol.', {
-                        position: "top-right",
-                        autoClose: 3000,
-                    });
-                    break;
-                case 'auth/invalid-email':
-                    toast.error('Düzgün email formatı deyil.', {
-                        position: "top-right",
-                        autoClose: 3000,
-                    });
-                    break;
-                default:
-                    toast.error('Daxil olma zamanı xəta baş verdi.', {
-                        position: "top-right",
-                        autoClose: 3000,
-                    });
-            }
+            handleLoginError(error);
         } finally {
             setIsLoading(false);
         }
     };
     
+    // Google ilə giriş funksiyası
     const handleGoogleSignIn = async () => {
         setIsLoading(true);
         try {
-            console.log('Google sign-in başladı');
             const provider = new GoogleAuthProvider();
             provider.addScope('profile');
             provider.addScope('email');
             
             const result = await signInWithPopup(auth, provider);
             
-            // Köhnə məlumatları təmizləyirik
+            // Məlumatları saxlayırıq
             localStorage.clear();
-            
-            // Google məlumatlarını saxlayırıq
             localStorage.setItem('authType', 'google');
             localStorage.setItem('userEmail', result.user.email);
             localStorage.setItem('userName', result.user.displayName);
     
-            toast.success('Google ilə daxil oldunuz!', {
-                position: "top-right",
-                autoClose: 2000,
-            });
-            setTimeout(() => {
-                navigate('/textinput');
-            }, 2000);
+            toast.success('Google ilə daxil oldunuz!');
+            setTimeout(() => navigate('/textinput'), 2000);
         } catch (error) {
-            console.error('Dəqiq xəta:', error);
+            console.error('Xəta:', error);
             toast.error(`Xəta: ${error.message}`);
         } finally {
             setIsLoading(false);
         }
     };
     
+    // Facebook ilə giriş funksiyası
     const handleFacebookSignIn = async () => {
         setIsLoading(true);
-        const provider = new FacebookAuthProvider();
         try {
+            const provider = new FacebookAuthProvider();
             const result = await signInWithPopup(auth, provider);
             
-            // Köhnə məlumatları təmizləyirik
+            // Məlumatları saxlayırıq
             localStorage.clear();
-            
-            // Facebook məlumatlarını saxlayırıq
             localStorage.setItem('authType', 'facebook');
             localStorage.setItem('userEmail', result.user.email);
             localStorage.setItem('userName', result.user.displayName);
             
-            toast.success('Facebook ilə daxil oldunuz!', {
-                position: "top-right",
-                autoClose: 2000,
-            });
-            setTimeout(() => {
-                navigate('/textinput');
-            }, 2000);
+            toast.success('Facebook ilə daxil oldunuz!');
+            setTimeout(() => navigate('/textinput'), 2000);
         } catch (error) {
             console.error('Facebook login error:', error);
-            toast.error('Facebook ilə daxil olma zamanı xəta baş verdi.', {
-                position: "top-right",
-                autoClose: 3000,
-            });
+            toast.error('Facebook ilə daxil olma zamanı xəta baş verdi.');
         } finally {
             setIsLoading(false);
         }
     };
+
+    // JSX strukturu
     return (
         <div className='w-full max-w-lg mx-auto pt-10 pb-16 px-4 flex items-center justify-center mt-[0px] sm:mt-[130px]'>
             <div className='flex flex-col items-center justify-center w-[361px]'>
                 <div className="w-full">
+                    {/* Başlıq */}
                     <h1 className="text-center text-black text-2xl sm:text-3xl font-semibold font-montserrat leading-normal mb-4">
                         Xoş gəlmişsiniz
                     </h1>
 
+                    {/* Giriş forması */}
                     <form onSubmit={handleLogin} className="w-full">
+                        {/* Email sahəsi */}
                         <div className='grid grid-rows gap-2 mb-3'>
                             <label className="text-black text-sm font-medium font-montserrat">E-mail</label>
                             <div className="w-full px-3 py-2 rounded-md border border-gray-300">
@@ -192,6 +149,7 @@ const Login = () => {
                             </div>
                         </div>
 
+                        {/* Parol sahəsi */}
                         <div className='grid grid-rows gap-2'>
                             <label className="text-black text-sm font-medium font-montserrat">Parol</label>
                             <div className="w-full px-3 py-2 rounded-md border border-gray-300">
@@ -207,12 +165,14 @@ const Login = () => {
                             </div>
                         </div>
 
+                        {/* Parol bərpası linki */}
                         <Link to='/forgetpassword'>
                             <p className='font-medium text-base leading-normal my-6 text-center font-montserrat'>
                                 Parolu unutmusan?
                             </p>
                         </Link>
 
+                        {/* Giriş düyməsi */}
                         <button
                             type="submit"
                             disabled={isLoading}
@@ -222,12 +182,14 @@ const Login = () => {
                         </button>
                     </form>
 
+                    {/* Alternativ giriş bölməsi */}
                     <div className='flex items-center justify-center w-full mb-6'>
                         <p className="flex-grow h-px bg-gray-300"></p>
                         <p className='font-medium text-sm leading-5 mx-2'>Digər hesablar ilə daxil olun</p>
                         <p className="flex-grow h-px bg-gray-300"></p>
                     </div>
 
+                    {/* Sosial şəbəkə düymələri */}
                     <div className='flex items-center justify-center gap-4'>
                         <button
                             className='flex items-center justify-center'
@@ -245,6 +207,7 @@ const Login = () => {
                         </button>
                     </div>
 
+                    {/* Qeydiyyat linki */}
                     <p className="mt-6 text-center">
                         Hesabınız yoxdur? <Link to='/registration' className='text-[#7B7DCF]'>Qeydiyyatdan keçin</Link>
                     </p>

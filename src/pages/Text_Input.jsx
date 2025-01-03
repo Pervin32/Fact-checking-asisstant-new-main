@@ -1,13 +1,18 @@
+// Lazımi React komponentlərini və hook-ları import edirik
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+// Giriş ikonunu import edirik
 import enter from '@/assets/img/enter.svg';
 
+// TextInput komponenti
 const TextInput = () => {
-  const [searchText, setSearchText] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [username, setUsername] = useState('İstifadəçi');
-  const navigate = useNavigate();
+  // State-ləri təyin edirik
+  const [searchText, setSearchText] = useState(''); // Axtarış mətni
+  const [isLoading, setIsLoading] = useState(false); // Yüklənmə statusu
+  const [username, setUsername] = useState('İstifadəçi'); // İstifadəçi adı
+  const navigate = useNavigate(); // Səhifələr arası naviqasiya üçün hook
 
+  // İstifadəçi məlumatlarını lokaldan yükləyən effect
   useEffect(() => {
     const storedData = ['userName', 'facebookProfile', 'userEmail']
       .map(key => localStorage.getItem(key))
@@ -23,18 +28,19 @@ const TextInput = () => {
     }
   }, []);
 
+  // Axtarış əməliyyatını həyata keçirən funksiya
   const handleSearch = async () => {
     if (!searchText.trim()) return;
 
     setIsLoading(true);
 
     try {
-      // Update search history
+      // Axtarış tarixçəsini yeniləyirik
       const searchHistory = JSON.parse(localStorage.getItem('searchHistory') || '[]');
       const newSearch = { text: searchText, date: new Date().toISOString() };
       localStorage.setItem('searchHistory', JSON.stringify([...searchHistory, newSearch]));
 
-      // Call API
+      // API sorğusu göndəririk
       const response = await fetch('https://fact-checking-assistant.onrender.com', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -43,6 +49,7 @@ const TextInput = () => {
 
       if (!response.ok) throw new Error('API ilə problem baş verdi.');
 
+      // API cavabını emal edirik
       const apiData = await response.json();
       navigate('/result', {
         state: {
@@ -53,6 +60,7 @@ const TextInput = () => {
         },
       });
     } catch (error) {
+      // Xəta halında əməliyyatları idarə edirik
       console.error('API error:', error);
       navigate('/result', {
         state: {
@@ -63,21 +71,26 @@ const TextInput = () => {
         },
       });
     } finally {
+      // Yüklənmə statusunu sıfırlayırıq
       setIsLoading(false);
       setSearchText('');
     }
   };
 
+  // Enter düyməsi hadisəsini idarə edən funksiya
   const handleKeyPress = event => {
     if (event.key === 'Enter') handleSearch();
   };
 
+  // Mətn dəyişikliyi hadisəsini idarə edən funksiya
   const handleTextChange = event => {
     setSearchText(event.target.value);
   };
 
+  // Komponentin JSX strukturu
   return (
     <div className="min-h-screen w-full px-4 md:px-6 lg:px-8">
+      {/* Başlıq paneli */}
       <header className="flex justify-end items-center gap-4 md:gap-6 pt-4 md:pt-10">
         <div className="bg-blue rounded-full px-4 py-2 md:px-6 md:py-2.5">
           <span className="text-white text-sm md:text-base whitespace-nowrap">
@@ -91,8 +104,11 @@ const TextInput = () => {
           <img src={enter} alt="Enter" className="w-8 h-8 md:w-9 md:h-9" />
         </Link>
       </header>
+
+      {/* Əsas məzmun */}
       <main className="flex items-center justify-center w-full mt-16 md:mt-32 lg:mt-40">
         <div className="w-full max-w-2xl mx-auto">
+          {/* Mətn daxiletmə sahəsi */}
           <textarea
             placeholder="İnformasiya və ya keçid linkini bura daxil edin!"
             className="w-full h-32 md:h-36 px-4 md:px-6 py-2 md:py-3
