@@ -48,7 +48,7 @@ const Navbar = ({ onPrinsiplerimizClick, onAboutClick, onWhoWeAreClick }) => {
                 <img src={logo} alt="logo" />
             </Link>
 
-            <div className="flex justify-between items-center gap-16 md:gap-40 sm:gap-20 font-medium whitespace-nowrap">
+            <div className="flex justify-between items-center gap-16 md:gap-40 sm:gap-20 text-base font-medium whitespace-nowrap">
                 <button onClick={onPrinsiplerimizClick} className="cursor-pointer">
                     Prinsiplərimiz
                 </button>
