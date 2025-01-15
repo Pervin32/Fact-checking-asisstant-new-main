@@ -72,11 +72,11 @@ const Navbar = ({ onPrinsiplerimizClick, onAboutClick, onWhoWeAreClick }) => {
                     </button>
                 </div>
             ) : (
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 font-semibold">
                     <Link to="/login" className="text-gray-700">
                         Daxil ol
                     </Link>
-                    <Link to="/registration" className="bg-blue font-bold text-white px-6 py-2 rounded-full">
+                    <Link to="/registration" className="bg-blue font-medium text-white px-6 py-2 rounded-full">
                         Qeydiyyat
                     </Link>
                 </div>
