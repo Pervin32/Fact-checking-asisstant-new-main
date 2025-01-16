@@ -7,11 +7,11 @@ const Loading = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-       // 2 saniyə sonra loading dayandırılır və result səhifəsinə yönləndirilir
+       // 5 saniyə sonra loading dayandırılır və result səhifəsinə yönləndirilir
         const timer = setTimeout(() => {
             setLoading(false);
             navigate('/result');
-        }, 2000);
+        }, 10000);
 
         // Komponent ayrıldıqda taymeri təmizləmək üçün təmizləmə funksiyası
         return () => clearTimeout(timer);
