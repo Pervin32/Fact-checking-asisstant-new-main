@@ -29,7 +29,8 @@ const Main = () => {
         };
     }, []);
 
-    const handlePrinsiplerimizClick = () => {
+    const handlePrinsiplerimizClick = (e) => {
+        e.preventDefault(); // Prevent default button behavior
         if (prinsiplerimizRef.current) {
             prinsiplerimizRef.current.scrollIntoView({ behavior: "smooth" });
         }
@@ -41,7 +42,7 @@ const Main = () => {
     };
 
     return (
-        <div className="flex flex-col">
+        <div className="flex flex-col"> {/* Added min-h-screen */}
             {/* Hero Section */}
             <div className="container mx-auto px-4 md:px-6 lg:px-8">
                 <div className="relative w-full h-[calc(100vh-4rem)] md:h-[calc(100vh-120px)] md:mt-[69px]">
@@ -77,11 +78,11 @@ const Main = () => {
                 </div>
             </div>
            
-            {/* Scroll Button with reduced margins */}
+            {/* Scroll Button */}
             <button 
                 onClick={handlePrinsiplerimizClick} 
                 className="cursor-pointer flex items-center justify-center mx-auto 
-                         -mt-32  mb-2 md:mb-8 transition-transform duration-300 
+                         sticky bottom-8 z-50 transition-transform duration-300 
                          hover:scale-110 focus:outline-none"
                 aria-label="Scroll to principles"
             >
@@ -92,8 +93,9 @@ const Main = () => {
                 />
             </button>
 
-            {/* Reference div */}
-            <div ref={prinsiplerimizRef} className="md:min-h-0"></div>
+             {/* Reference div */}
+             <div ref={prinsiplerimizRef} className="md:min-h-0"></div>
+
         </div>
     );
 };
